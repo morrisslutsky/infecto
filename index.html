@@ -78,17 +78,21 @@ var LIFER = function Lifer () {
         Canvas[1].addEventListener("touchstart", doTouchMove, false);
         Canvas[2].addEventListener("touchstart", doTouchMove, false);
 
-        cX = Canvas[0].width; cY = Canvas[0].height;
-
-        msX = cX / parseInt(Canvas[0].style.width);
-        if (!Canvas[0].style.width) msX = 1;
-        msY = cY / parseInt(Canvas[0].style.height);
-        if (!Canvas[0].style.height) msY = 1;
-        pX = Canvas[0].getBoundingClientRect().left;
-        pY = Canvas[0].getBoundingClientRect().top;
+        setScaling();
+        window.addEventListener("resize", setScaling);
+        window.addEventListener("touchmove", function(e) {e.preventDefault();});
         if (!initBoard()) return false;
         life();
         return true; 
+    }
+
+    this.setScaling = function() {
+        rr = Canvas[0].getBoundingClientRect();
+        cX = Canvas[0].width; cY = Canvas[0].height;
+        msX = cX / (rr.right - rr.left);
+        msY = cY / (rr.bottom - rr.top);
+        pX = rr.left;
+        pY = rr.top;
     }
 
     this.life = function () {
@@ -167,22 +171,17 @@ var LIFER = function Lifer () {
 
     this.doTouchMove = function(event) {
         if (0 ==event.touches.length) return;
-        mX = parseInt((event.touches.item(0).clientX-pX)*msX); mY = parseInt((event.touches.item(0).clientY-pY)*msY);
-        if (mX < parseInt(cX*(0.5+spawnBox))) {
-            if (mX > parseInt(cX*(0.5-spawnBox))) {
-                if (mY < parseInt(cY*(0.5+spawnBox))){
-                    if (mY > parseInt(cY*(0.5-spawnBox))){
-                        mX = mY = -1; return;
-                    }
-                }
-            }
-        }
+        dropCells(event.touches.item(0).clientX, event.touches.item(0).clientY);
         event.preventDefault();
     }
 
     /*  record mousemove event for cycle() to lay down new green (P2)           */
     this.doMouseMove = function(event) {
-        mX = parseInt((event.clientX-pX)*msX); mY = parseInt((event.clientY-pY)*msY);
+        dropCells(event.clientX, event.clientY);
+    }
+
+    this.dropCells = function(clientX, clientY) {
+        mX = parseInt((clientX-pX)*msX); mY = parseInt((clientY-pY)*msY);
         if (mX < parseInt(cX*(0.5+spawnBox))) {
             if (mX > parseInt(cX*(0.5-spawnBox))) {
                 if (mY < parseInt(cY*(0.5+spawnBox))){
