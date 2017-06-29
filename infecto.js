@@ -1,4 +1,8 @@
 
+function dbg(A) {
+    console.log(A);
+}
+
 function graphicSettings() {
     this.p1Color = 0xFF1020;
     this.p2Color = 0x20FF00;
@@ -24,8 +28,10 @@ function cellRenderer() {
     var Canvas = new Array();
     var curCanvas = 0;
 
-    var fadeP1 = new Array();
-    var fadeP2 = new Array();
+
+    var colorMap;
+
+    this.getColorMap = function() {return colorMap;}
 
     var szX, szY;
 
@@ -43,10 +49,19 @@ function cellRenderer() {
         Canvas[0] = document.getElementById("cells1");
         Canvas[1] = document.getElementById("cells2");
         szX = Canvas[0].width; szY = Canvas[0].height;
-        console.log("Resize cell canvas: " + szX + "," + szY)
+        dbg("Resize cell canvas: " + szX + "," + szY)
     }
 
-    this.colorMap = function() {
+    this.createColorMap = function() {
+        /* 
+            cellState storage format:  row by row (x coordinate)
+            cellState 0:  empty cell
+            cellState 1:  player 1 (computer enemy)
+            cellState 2:  player 2 (you the user)
+            cellState < 0:  holds a 'ghost' of a dead cell
+            cellState:  -127 to -1, odd numbered, ghost of p1
+            cellState:  -128 to -2, odd numbered, ghost of p2
+        */
         var rp1 = (g.p1Color & 0xFF0000) >> 16;
         var gp1 = (g.p1Color & 0xFF00) >> 8;
         var bp1 = g.p1Color & 0xFF;
@@ -58,23 +73,28 @@ function cellRenderer() {
         var gbk = (g.bgColor & 0xFF00) >> 8;
         var bbk = g.bgColor & 0xFF;
 
-        var i; for (i=0;i<256;i++){
-            rp1 = rp1 - g.fadestep; if (rp1 < rbk) rp1 = rbk;
-            rp2 = rp2 - g.fadestep; if (rp2 < rbk) rp2 = rbk;
-            gp1 = gp1 - g.fadestep; if (gp1 < gbk) gp1 = gbk;
-            gp2 = gp2 - g.fadestep; if (gp2 < gbk) gp2 = gbk;
-            bp1 = bp1 - g.fadestep; if (bp1 < bbk) bp1 = bbk;
-            bp2 = bp2 - g.fadestep; if (bp2 < bbk) bp2 = bbk;
-            fadeP1[i] = (rp1 << 16) | (gp1 << 8) | bp1;
-            fadeP2[i] = (rp2 << 16) | (gp2 << 8) | bp2;
+        var fs = g.fadestep;
+
+        var cm = new Array();
+        cm[0] = g.bgColor; cm[1] = g.p1Color; cm[2] = g.p2Color;
+        var i; for (i = -128; i<0; i+=2) {
+            rp1 = (rp1 > rbk) ? (rp1 - fs) : (rp1 < rbk) ? (rp1 + fs) : rp1;
+            rp2 = (rp2 > rbk) ? (rp2 - fs) : (rp2 < rbk) ? (rp2 + fs) : rp2;
+            gp1 = (gp1 > gbk) ? (gp1 - fs) : (gp1 < gbk) ? (gp1 + fs) : gp1;
+            gp2 = (gp2 > gbk) ? (gp2 - fs) : (gp2 < gbk) ? (gp2 + fs) : gp2;
+            bp1 = (bp1 > bbk) ? (bp1 - fs) : (bp1 < bbk) ? (bp1 + fs) : bp1;
+            bp2 = (bp2 > bbk) ? (bp2 - fs) : (bp2 < bbk) ? (bp2 + fs) : bp2;
+            cm[i] = (rp2 << 16) | (gp2 << 8) | bp2;
+            cm[i+1] = (rp1 << 16) | (gp1 << 8) | bp1;
         }
-        console.log("Colormap created");
+        colorMap = cm;
+        dbg("Colormap created");
     }
 
     this.init = function() {
         that.resize();
-        that.colorMap();
-        console.log ("Bringing up canvas:" + szX + ", " + szY)
+        that.createColorMap();
+        dbg ("Bringing up canvas:" + szX + ", " + szY)
         var i;  for (i=0;i<2;i++) {
             var ctx=Canvas[i].getContext("2d");
             ctx.fillStyle = "#" + g.bgColor.toString(16);
@@ -87,6 +107,41 @@ function cellRenderer() {
 }
 
 
+function cellBoard(a, b) {
+    this.szX = a; this.szY = b;
+    this.sz = a * b;
+    /* 
+        cellState storage format:  row by row (x coordinate)
+        cellState 0:  empty cell
+        cellState 1:  player 1 (computer enemy)
+        cellState 2:  player 2 (you the user)
+        cellState < 0:  holds a 'ghost' of a dead cell
+        cellState:  -127 to -1, odd numbered, ghost of p1
+        cellState:  -128 to -2, odd numbered, ghost of p2
+    */
+    this.cellState = new Int8Array(a * b);
+    this.p1NCnt = new Int8Array(a * b);
+    this.p2NCnt = new Int8Array(a * b);
+}
+
+function cellAutomaton() {
+    var that = this;
+    var szX, szY;
+   
+
+    var cb = new Array();
+    this.getCB = function() {return cb;}
+
+    this.init = function() {
+        var cc = document.getElementById("cells1");
+        szX = cc.width; szY = cc.height;
+        dbg("Initializing cell automaton " + szX + ", " + szY);
+        cb[0] = new cellBoard(szX, szY);
+        cb[1] = new cellBoard(szX, szY);
+
+    }
+}
+
 function CLifer () {
 
     var that = this;    
@@ -96,14 +151,24 @@ function CLifer () {
     var cR = new cellRenderer();
     this.getCR = function() {return cR;}
 
-    this.init = function() {
-        console.log("Initializing LIFER Object");
-        cR.init();
-        console.log("Initialized cell renderer");
+    var cA = new cellAutomaton();
+    this.getCA = function() {return cA;}
 
+    function setScaling() {
+        dbg("Resizing window");
+        cR.resize();
+    }
+
+    this.init = function() {
+        dbg("Initializing LIFER Object");
+        cR.init();
+        dbg("Initialized cell renderer");
+        setScaling();
+        cA.init();
+        window.addEventListener("resize", setScaling);
     }
   
-    console.log("Constructed LIFER Object");
+    dbg("Constructed LIFER Object");
  
 
 
