@@ -26,7 +26,11 @@ function cellRenderer() {
     this.getGS = function() {return g;}
     
     var Canvas = new Array();
-    var curCanvas = 0;
+    /*  curCanvas is the HIDDEN surface
+        onto which rendering is done, prior
+        to calling swap() */
+
+    var curCanvas = 0;  
 
 
     var colorMap;
@@ -37,7 +41,19 @@ function cellRenderer() {
 
     this.getCanvas = function() {return Canvas;}
     this.getCurCanvas = function() {return curCanvas;}
-    this.render = function(stateArray) {;}
+
+    this.rgba2List = function(rgba) {
+        return [rgba & 0xFF, (rgba >> 8) & 0xFF, (rgba >> 16) & 0xFF, 0];
+    }
+
+    this.render = function(cellStates) {
+        ctx = Canvas[curCanvas].getContext("2d");
+        imageData = ctx.getImageData(0,0,szX, szY);
+        var sz = szX * szY; var i;
+        for (i=0; i < sz; i++) {
+
+        }
+    }
 
     this.swap = function() {
         Canvas[1-curCanvas].style.visibility='hidden';
@@ -127,18 +143,26 @@ function cellBoard(a, b) {
 function cellAutomaton() {
     var that = this;
     var szX, szY;
-   
-
     var cb = new Array();
     this.getCB = function() {return cb;}
-
     this.init = function() {
         var cc = document.getElementById("cells1");
         szX = cc.width; szY = cc.height;
         dbg("Initializing cell automaton " + szX + ", " + szY);
         cb[0] = new cellBoard(szX, szY);
         cb[1] = new cellBoard(szX, szY);
+    }
 
+    this.testCellState = function() {
+        var sz = szX * szY;
+        var ret = new Int8Array(szX * szY);
+        var i, b; for (i=0; i < sz; i++) {
+            b = (i >> 2) % 128; b = - b;
+            if (Math.random() < 0.2) b = 1;
+            if (Math.random() < 0.2) b = 2;
+            ret[i] = b;
+        }
+        return ret;
     }
 }
 
