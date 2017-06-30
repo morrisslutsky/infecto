@@ -10,14 +10,14 @@ function graphicSettings() {
     this.msgColor = "rgba(255,255,0,0.8)";
     this.msgFill = "rgba(255,255,0,0.5)";
     this.lossRadius = 0.1;
-    this.fadestep = 1;
+    this.fadestep = 2;
 }
 
 function gameSettings() {
     this.spawnBox = 0.25;
     this.mouseCycles = 1;
     this.spawnCycles = 500;
-    this.frameDelay = 15;
+    this.frameDelay = 5;
 }
 
 function cellRenderer() {
@@ -50,10 +50,9 @@ function cellRenderer() {
         var ctx = Canvas[curCanvas].getContext("2d");
         var image = ctx.getImageData(0,0,szX, szY);
         var imageData = image.data;
-        var sz = szX * szY; var i; var j = 0; var cc;
+        var sz = szX * szY; var i; var j = 0; 
         for (i=0; i < sz; i++) {
-            cc = cellStates[i]; if (cc < 0) {cc = 0;}
-            imageData.set(colorMap[cc],j);
+            imageData.set(colorMap[cellStates[i]],j);
             j += 4;
         }
         ctx.putImageData(image,0,0);
@@ -156,6 +155,11 @@ function cellBoard(a, b) {
         that.p1NCnt.set(cB2.p1NCnt);
         that.p2NCnt.set(cB2.p2NCnt);
     }
+
+    this.blitNC = function (cB2) {
+        that.p1NCnt.set(cB2.p1NCnt);
+        that.p2NCnt.set(cB2.p2NCnt);
+    }
 }
 
 function cellAutomaton() {
@@ -211,16 +215,14 @@ function cellAutomaton() {
         writes them to cb[1].  Finally, swaps cb[0] and cb[1] */
 
     this.cycle = function() {
-        cb[1].blit(cb[0]); 
+        cb[1].blitNC(cb[0]); 
+        cb[1].cellState = cb[0].cellState.map(function(x) {if (x < 0) {x = x + 2; if (x > 0) {x=0;}} return x;});
         var x, y, c, n, nc, i=0;
         for (y = 0; y < szY; y++) {
             for (x = 0; x < szX; x++) {
                 c = cb[0].cellState[i]; nc = c;
-                n = cb[0].p1NCnt[i] + cb[0].p2NCnt[i];
-                if (c < 0) { /* fadeout ghost of dying cell */
-                    nc = c + 2;  if (nc > 0) nc = 0;
-                    cb[1].cellState[i] = nc; /* easier than setting */
-                } else if (c == 0) {
+                n = cb[0].p1NCnt[i] + cb[0].p2NCnt[i]; 
+                if (c <= 0) {
                     /* is a new cell born here? */
                     if (n == 3) {
                         nc = (cb[0].p1NCnt[i] > cb[0].p2NCnt[i]) ? 1 : 2;
@@ -229,8 +231,8 @@ function cellAutomaton() {
                 }   else { /* c must be either 1 or 2 */
                     if ( (n < 2) || (n > 3) ) {
                         /* cell dies */
-                        //that.alterCell(x, y, (c==1)?-61:-62, 1);
-                        that.alterCell(x, y, 0, 1);
+                        that.alterCell(x, y, (c==1)?-21:-22, 1);
+                        //that.alterCell(x, y, 0, 1);
                     }
                 }
                 i++;
