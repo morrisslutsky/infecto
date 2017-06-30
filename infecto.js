@@ -17,7 +17,7 @@ function gameSettings() {
     this.spawnBox = 0.25;
     this.mouseCycles = 1;
     this.spawnCycles = 500;
-    this.frameDelay = 5;
+    this.frameDelay = 40;
 }
 
 function cellRenderer() {
@@ -25,12 +25,8 @@ function cellRenderer() {
     var g = new graphicSettings();
     this.getGS = function() {return g;}
     
-    var Canvas = new Array();
-    /*  curCanvas is the HIDDEN surface
-        onto which rendering is done, prior
-        to calling swap() */
-
-    var curCanvas = 0;  
+    var Canvas;
+    
 
 
     var colorMap;
@@ -40,14 +36,13 @@ function cellRenderer() {
     var szX, szY;
 
     this.getCanvas = function() {return Canvas;}
-    this.getCurCanvas = function() {return curCanvas;}
 
     this.rgba2List = function(rgba) {
         return [(rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF, rgba & 0xFF, 0xFF];
     }
 
     this.render = function(cellStates) {
-        var ctx = Canvas[curCanvas].getContext("2d");
+        var ctx = Canvas.getContext("2d");
         var image = ctx.getImageData(0,0,szX, szY);
         var imageData = image.data;
         var sz = szX * szY; var i; var j = 0; 
@@ -57,19 +52,13 @@ function cellRenderer() {
         }
         ctx.putImageData(image,0,0);
         imageData = 0; image = 0;
-        that.swap();
+      
     }
 
-    this.swap = function() {
-        Canvas[1-curCanvas].style.visibility='hidden';
-        Canvas[curCanvas].style.visibility='visible';
-        curCanvas = 1 - curCanvas;
-    }
 
     this.resize = function() {
-        Canvas[0] = document.getElementById("cells1");
-        Canvas[1] = document.getElementById("cells2");
-        szX = Canvas[0].width; szY = Canvas[0].height;
+        Canvas = document.getElementById("cells");
+        szX = Canvas.width; szY = Canvas.height;
         dbg("Resize cell canvas: " + szX + "," + szY)
     }
 
@@ -121,13 +110,12 @@ function cellRenderer() {
         that.resize();
         that.createColorMap();
         dbg ("Bringing up canvas:" + szX + ", " + szY)
-        var i;  for (i=0;i<2;i++) {
-            var ctx=Canvas[i].getContext("2d");
-            ctx.fillStyle = "#" + g.bgColor.toString(16);
-            ctx.fillRect(0,0,szX, szY);
-            ctx = 0;
-        }
-        that.swap();
+        
+        var ctx=Canvas.getContext("2d");
+        ctx.fillStyle = "#" + g.bgColor.toString(16);
+        ctx.fillRect(0,0,szX, szY);
+        ctx = 0;
+        Canvas.style.visibility = 'visible';
     }
 
 }
@@ -174,7 +162,7 @@ function cellAutomaton() {
     this.cellState = function() {return cb[0].cellState;}
 
     this.init = function() {
-        var cc = document.getElementById("cells1");
+        var cc = document.getElementById("cells");
         szX = cc.width; szY = cc.height;
         dbg("Initializing cell automaton " + szX + ", " + szY);
         cb[0] = new cellBoard(szX, szY);
@@ -225,23 +213,23 @@ function cellAutomaton() {
 
     this.cycle = function() {
         cb[1].blitNC(cb[0]); 
-        cb[1].cellState = cb[0].cellState.map(function(x) {return fadeLUT[x];});
-        var x, y, c, n, nc, i=0;
+        var x, y, c, n, nc, ac, i=0;
         for (y = 0; y < szY; y++) {
             for (x = 0; x < szX; x++) {
                 c = cb[0].cellState[i]; nc = c;
                 n = cb[0].p1NCnt[i] + cb[0].p2NCnt[i]; 
+                cb[1].cellState[i] = fadeLUT[c];
                 if (c <= 0) {
                     /* is a new cell born here? */
                     if (n == 3) {
                         nc = (cb[0].p1NCnt[i] > cb[0].p2NCnt[i]) ? 1 : 2;
                         that.alterCell(x, y, nc, 1);
-                    }
+                
+                    } 
                 }   else { /* c must be either 1 or 2 */
                     if ( (n < 2) || (n > 3) ) {
                         /* cell dies */
                         that.alterCell(x, y, (c==1)?-15:-16, 1);
-                        //that.alterCell(x, y, 0, 1);
                     }
                 }
                 i++;
