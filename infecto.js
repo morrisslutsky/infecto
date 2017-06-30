@@ -166,6 +166,7 @@ function cellAutomaton() {
     var that = this;
     var dx = [ 0,  1, 1, 1, 0, -1, -1, -1];
     var dy = [-1, -1, 0, 1, 1,  1,  0, -1];
+    var fadeLUT = new Array();
     var szX, szY;
     var cb = new Array();
     this.getCB = function() {return cb;}
@@ -178,6 +179,14 @@ function cellAutomaton() {
         dbg("Initializing cell automaton " + szX + ", " + szY);
         cb[0] = new cellBoard(szX, szY);
         cb[1] = new cellBoard(szX, szY);
+        var i = 0;
+        for (i = -128; i < -1; i++) {
+            fadeLUT[i] = i + 2;
+        }
+        fadeLUT[-1] = 0; fadeLUT[-2] = 0;
+        for (i = 0; i < 128; i++) {
+            fadeLUT[i] = i;
+        }
     }
 
     this.validXY = function (x, y) {
@@ -216,7 +225,7 @@ function cellAutomaton() {
 
     this.cycle = function() {
         cb[1].blitNC(cb[0]); 
-        cb[1].cellState = cb[0].cellState.map(function(x) {if (x < 0) {x = x + 2; if (x > 0) {x=0;}} return x;});
+        cb[1].cellState = cb[0].cellState.map(function(x) {return fadeLUT[x];});
         var x, y, c, n, nc, i=0;
         for (y = 0; y < szY; y++) {
             for (x = 0; x < szX; x++) {
@@ -231,7 +240,7 @@ function cellAutomaton() {
                 }   else { /* c must be either 1 or 2 */
                     if ( (n < 2) || (n > 3) ) {
                         /* cell dies */
-                        that.alterCell(x, y, (c==1)?-21:-22, 1);
+                        that.alterCell(x, y, (c==1)?-15:-16, 1);
                         //that.alterCell(x, y, 0, 1);
                     }
                 }
