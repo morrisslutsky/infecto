@@ -4,20 +4,66 @@ function dbg(A) {
 }
 
 function graphicSettings() {
+
+    if (typeof graphicSettings.instance === 'object') {
+        return graphicSettings.instance;
+    }
     this.p1Color = 0xFF1020;
     this.p2Color = 0x20FF00;
     this.bgColor = 0x100030;
-    this.msgColor = "rgba(255,255,0,0.8)";
-    this.msgFill = "rgba(255,255,0,0.5)";
-    this.lossRadius = 0.1;
-    this.fadestep = 2;
+    this.fadestep = 3;
+    this.cursorColor = 0xE0F0F0;
+
+    graphicSettings.instance = this;
 }
 
 function gameSettings() {
+
+    if (typeof gameSettings.instance === 'object') {
+        return gameSettings.instance;
+    }
+
     this.spawnBox = 0.25;
     this.mouseCycles = 1;
     this.spawnCycles = 500;
     this.frameDelay = 40;
+
+    gameSettings.instance = this;
+}
+
+function gameCursor() {
+    var that = this;
+    var g = new graphicSettings();
+    this.getGS = function() {return g;}
+
+    var Canvas;
+    var posX, posY;
+
+    this.setScale = function() {
+        Canvas = document.getElementById("overlay");
+        Canvas.style.visibility = "visible";
+        Canvas.width = Canvas.getBoundingClientRect().width;
+        Canvas.height = Canvas.getBoundingClientRect().height;
+        dbg ("Set canvas style wh" + Canvas.width + "," + Canvas.height);
+        that.paint();
+    }
+
+    this.paint = function() {
+        var ctx = Canvas.getContext("2d");
+        ctx.strokeStyle = "#" + g.cursorColor.toString(16);
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(Canvas.width-1, Canvas.height-1);
+        ctx.moveTo(0, Canvas.height-1);
+        ctx.lineTo(Canvas.width-1, 0);
+        ctx.stroke();
+    }
+
+    this.init = function () {
+        that.setScale();
+        posX = posY = 0.5;
+
+    }
 }
 
 function cellRenderer() {
@@ -229,7 +275,7 @@ function cellAutomaton() {
                 }   else { /* c must be either 1 or 2 */
                     if ( (n < 2) || (n > 3) ) {
                         /* cell dies */
-                        that.alterCell(x, y, (c==1)?-15:-16, 1);
+                        that.alterCell(x, y, (c==1)?-31:-32, 1);
                     }
                 }
                 i++;
@@ -264,9 +310,12 @@ function CLifer () {
     var cA = new cellAutomaton();
     this.getCA = function() {return cA;}
 
+    var gC = new gameCursor();
+
     function setScaling() {
         dbg("Resizing window");
         cR.resize();
+        gC.setScale();
     }
 
     this.init = function() {
@@ -274,6 +323,7 @@ function CLifer () {
         cR.init();
         dbg("Initialized cell renderer");
         setScaling();
+        gC.init();
         cA.init();
         window.addEventListener("resize", setScaling);
         window.addEventListener("touchmove", function(e) {e.preventDefault();});
