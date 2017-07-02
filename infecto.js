@@ -16,7 +16,7 @@ function graphicSettings() {
     this.cursorRadius = 0.05;
     this.cursorArms = 0.1;
     this.cursorPx = 2.0;
-    this.cursorK = 50.0;
+    this.cursorK = 100.0;
     this.cursorD = 0.75;
 
     graphicSettings.instance = this;
@@ -63,6 +63,15 @@ function gameCursor() {
         dbg ("Set canvas style wh" + Canvas.width + "," + Canvas.height);
         fD = new gameSettings().frameDelay;
         that.paint(true);
+    }
+
+    this.sendMouseClientPos = function (cX, cY) {
+        Canvas = document.getElementById("overlay");
+        var rr = Canvas.getBoundingClientRect();
+        cX = cX - rr.left; cY = cY - rr.top;
+        cX /= rr.width; cY /= rr.height;
+        if ( (cX < 0) || (cY < 0) || (cX > 1.0) || (cY > 1.0) ) {return;}
+        tX = cX; tY = cY;
     }
 
     this.physics = function() {
@@ -365,11 +374,35 @@ function CLifer () {
         cA.init();
         window.addEventListener("resize", setScaling);
         window.addEventListener("touchmove", function(e) {e.preventDefault();});
+        document.getElementById("thebody").addEventListener("onscroll", function(e) {e.preventDefault();});
+
+        var ele;
+        var ename = ["overlay", "playfield", "cells"];
+        for (var i = 0; i < ename.length; i++) {
+            ele = document.getElementById(ename[i]);
+            if (ele) {
+                ele.addEventListener("mousemove", that.onMouseMove, true);
+                ele.addEventListener("touchmove", that.onTouchMove, true);
+                ele.addEventListener("touchstart", that.onTouchMove, true);
+            }
+        }
         this.demoLoop();
     }
   
-    dbg("Constructed LIFER Object");
- 
+    this.onMouseMove = function(e) {
+        gC.sendMouseClientPos(e.clientX, e.clientY);
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    this.onTouchMove = function(e) {
+        if (0 ==e.touches.length) return;
+        gC.sendMouseClientPos(event.touches.item(0).clientX, event.touches.item(0).clientY);
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+
     this.renderCells = function() {
         cR.render(cA.cellState());
     }
@@ -387,6 +420,7 @@ function CLifer () {
         window.setTimeout(that.loop2, g.frameDelay);
     }
 
+    dbg("Constructed LIFER Object");
 }
 
 var LIFER = new CLifer();
