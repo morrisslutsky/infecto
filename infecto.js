@@ -13,6 +13,11 @@ function graphicSettings() {
     this.bgColor = 0x100030;
     this.fadestep = 3;
     this.cursorColor = 0xE0F0F0;
+    this.cursorRadius = 0.05;
+    this.cursorArms = 0.1;
+    this.cursorPx = 2.0;
+    this.cursorK = 50.0;
+    this.cursorD = 0.75;
 
     graphicSettings.instance = this;
 }
@@ -37,7 +42,18 @@ function gameCursor() {
     this.getGS = function() {return g;}
 
     var Canvas;
-    var posX, posY;
+    this.posX = 0.5;
+    this.posY = 0.5;
+    this.visible = true;
+
+    var fD = new gameSettings().frameDelay;
+
+    var tX = 0.5; var tY = 0.5;
+    var vX = 0; var vY = 0;
+
+    this.moveCursor = function (nX, nY) {
+        tX = nX; tY = nY;
+    }
 
     this.setScale = function() {
         Canvas = document.getElementById("overlay");
@@ -45,23 +61,44 @@ function gameCursor() {
         Canvas.width = Canvas.getBoundingClientRect().width;
         Canvas.height = Canvas.getBoundingClientRect().height;
         dbg ("Set canvas style wh" + Canvas.width + "," + Canvas.height);
-        that.paint();
+        fD = new gameSettings().frameDelay;
+        that.paint(true);
     }
 
-    this.paint = function() {
+    this.physics = function() {
+        var aX, aY; var tc = fD/1000;
+        aX = g.cursorK * (tX - that.posX);
+        aY = g.cursorK * (tY - that.posY);
+        var c = g.cursorD * 2.0 * Math.sqrt(g.cursorK);
+        aX -= c * vX;  aY -= c *vY;
+        vX += aX * tc; vY += aY * tc;
+        that.posX += vX * tc; that.posY += vY * tc;
+        that.paint(true);
+    }
+
+    this.paint = function(eb) {
         var ctx = Canvas.getContext("2d");
+        if (eb) {ctx.clearRect(0,0,Canvas.width, Canvas.height);}
         ctx.strokeStyle = "#" + g.cursorColor.toString(16);
+        ctx.lineWidth = g.cursorPx * 1.0 * Canvas.width / 384.0;
+        var dx = g.cursorArms * Canvas.width * 0.5;
+        var oriX = that.posX * Canvas.width;
+        var oriY = that.posY * Canvas.height;
         ctx.beginPath();
-        ctx.moveTo(0,0);
-        ctx.lineTo(Canvas.width-1, Canvas.height-1);
-        ctx.moveTo(0, Canvas.height-1);
-        ctx.lineTo(Canvas.width-1, 0);
+        ctx.moveTo(oriX, oriY-dx);
+        ctx.lineTo(oriX, oriY+dx);
+        ctx.moveTo(oriX-dx,oriY);
+        ctx.lineTo(oriX+dx, oriY);
+
+        ctx.arc(oriX, oriY, g.cursorRadius * Canvas.width * 0.5, 0, 6.2831853);
         ctx.stroke();
+
     }
 
     this.init = function () {
         that.setScale();
-        posX = posY = 0.5;
+        posX = posY = tX = tY = 0.5;
+        vX = vY = 0;
 
     }
 }
@@ -311,6 +348,7 @@ function CLifer () {
     this.getCA = function() {return cA;}
 
     var gC = new gameCursor();
+    this.getGC = function() {return gC;}
 
     function setScaling() {
         dbg("Resizing window");
@@ -343,6 +381,7 @@ function CLifer () {
     }
 
     this.loop2 = function() {
+        gC.physics();
         cA.cycle();
         cR.render(cA.cellState());
         window.setTimeout(that.loop2, g.frameDelay);
