@@ -70,7 +70,8 @@ function gameCursor() {
         var rr = Canvas.getBoundingClientRect();
         cX = cX - rr.left; cY = cY - rr.top;
         cX /= rr.width; cY /= rr.height;
-        if ( (cX < 0) || (cY < 0) || (cX > 1.0) || (cY > 1.0) ) {return;}
+        cX = Math.max (cX, 0.0); cY = Math.max (cY, 0.0);
+        cX = Math.min (cX, 1.0); cY = Math.min (cY, 1.0);
         tX = cX; tY = cY;
     }
 
@@ -374,10 +375,12 @@ function CLifer () {
         cA.init();
         window.addEventListener("resize", setScaling);
         window.addEventListener("touchmove", function(e) {e.preventDefault();});
-        document.getElementById("thebody").addEventListener("onscroll", function(e) {e.preventDefault();});
+        document.addEventListener("onscroll", function(e) {e.preventDefault(); e.stopPropagation();}, true);
+        document.addEventListener("touchstart", function(e) {e.preventDefault();}, true);
+        document.addEventListener("touchmove", function(e) {e.preventDefault();}, true);
 
         var ele;
-        var ename = ["overlay", "playfield", "cells"];
+        var ename = ["overlay", "playfield", "cells", "container", "outer"];
         for (var i = 0; i < ename.length; i++) {
             ele = document.getElementById(ename[i]);
             if (ele) {
