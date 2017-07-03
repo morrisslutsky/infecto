@@ -18,6 +18,8 @@ function graphicSettings() {
     this.cursorPx = 2.0;
     this.cursorK = 300.0;
     this.cursorD = 0.65;
+    this.boxColor = 0xC0C0F0;
+    this.boxPx = 3.0;
 
     graphicSettings.instance = this;
 }
@@ -29,7 +31,7 @@ function gameSettings() {
     }
 
     this.spawnBox = 0.25;
-    this.mouseCycles = 1;
+    this.dropCycles = 1;
     this.spawnCycles = 500;
     this.frameDelay = 40;
 
@@ -88,12 +90,23 @@ function gameCursor() {
 
     this.paint = function(eb) {
         var ctx = Canvas.getContext("2d");
-        if (eb) {ctx.clearRect(0,0,Canvas.width, Canvas.height);}
+        var cX = Canvas.width; var cY = Canvas.height;
+        if (eb) {ctx.clearRect(0,0,cX, cY);}
+
+        var spawnBox = new gameSettings().spawnBox;
+        if (spawnBox) {
+            ctx.rect(parseInt(cX*(0.5-spawnBox)), parseInt(cY*(0.5-spawnBox)),
+                    parseInt(cX*spawnBox*2), parseInt(cY*spawnBox*2));
+            ctx.strokeStyle = "#" + g.boxColor.toString(16);
+            ctx.lineWidth = g.boxPx * 1.0 * cX / 384.0;
+            ctx.stroke();
+        }
+
         ctx.strokeStyle = "#" + g.cursorColor.toString(16);
-        ctx.lineWidth = g.cursorPx * 1.0 * Canvas.width / 384.0;
-        var dx = g.cursorArms * Canvas.width * 0.5;
-        var oriX = that.posX * Canvas.width;
-        var oriY = that.posY * Canvas.height;
+        ctx.lineWidth = g.cursorPx * 1.0 * cX / 384.0;
+        var dx = g.cursorArms * cX * 0.5;
+        var oriX = that.posX * cX;
+        var oriY = that.posY * cY;
         ctx.beginPath();
         ctx.moveTo(oriX, oriY-dx);
         ctx.lineTo(oriX, oriY+dx);
@@ -251,6 +264,7 @@ function cellAutomaton() {
     var szX, szY;
     var cb = new Array();
     this.getCB = function() {return cb;}
+    var gs = new gameSettings();
 
     this.cellState = function() {return cb[0].cellState;}
 
@@ -301,6 +315,20 @@ function cellAutomaton() {
         cb[cboard].cellState[x + szX * y] = ncell;
     }
 
+    this.dropBlinker = function(posX, posY) {
+        var bX = Math.round(posX * szX); 
+        var bY = Math.round(posY * szY);
+        bX = Math.max(1, bX); bY = Math.max(1, bY);
+        bX = Math.min(bX, szX - 2); bY = Math.min(bY, szY - 2);
+        /* drop new green cells onto cb[0] */
+        
+        that.alterCell(bX, bY, 2, 0);
+        that.alterCell(bX, bY+1, 2, 0);
+        that.alterCell(bX, bY-1, 2, 0);
+
+
+    }
+
     /*  reads cell states and neighbor counts from cb[0]
         writes them to cb[1].  Finally, swaps cb[0] and cb[1] */
 
@@ -322,13 +350,74 @@ function cellAutomaton() {
                 }   else { /* c must be either 1 or 2 */
                     if ( (n < 2) || (n > 3) ) {
                         /* cell dies */
-                        that.alterCell(x, y, (c==1)?-31:-32, 1);
+                        that.alterCell(x, y, (c==1)?-63:-64, 1);
                     }
                 }
                 i++;
             }
         }
         var tp = cb[0]; cb[0] = cb[1]; cb[1] = tp;
+    }
+
+    this.spawnCells = function(type) {
+        var x, y, b;
+        var x0 = Math.round((0.5 - gs.spawnBox) * szX);
+        var x1 = Math.round((0.5 + gs.spawnBox) * szX);
+        var y0 = Math.round((0.5 - gs.spawnBox) * szY);
+        var y1 = Math.round((0.5 + gs.spawnBox) * szY);
+
+        switch (type) {
+            case 0: /* random fill */
+                 for (x=x0; x <= x1; x++) {
+                    for (y = x0; y <= y1; y++) {
+                        b = 0;
+                        if (Math.random() < 0.3) {b = 1;}
+                        if (b) {that.alterCell (x, y, b, 0);}
+                    }
+                }
+                break;
+            case 1: /* 1-direction glider flotilla */
+            case 2:
+            case 3:
+            case 4:
+                for (x = szX/2; x < x1-2; x += 5) {
+                    for (y = szY/2; y < y1-2; y+= 5) {
+                        that.dropGlider(x,y,type-1);
+                        that.dropGlider(szX-x, szY-y, type-1);
+                        that.dropGlider(szX-x, y, type-1);
+                        that.dropGlider(x, szY-y, type-1);
+                    }
+                }
+                break;
+            case 5: /* 4-way glider flotilla */
+                for (x = 5 + szX/2; x < x1-2; x += 5) {
+                    for (y = 5 + szY/2; y < y1-2; y+= 5) {
+                        that.dropGlider(x,y,0);
+                        that.dropGlider(szX-x, szY-y, 3);
+                        that.dropGlider(szX-x, y, 1);
+                        that.dropGlider(x, szY-y, 2);
+                    }
+                }
+                break;
+        }
+    }
+
+    /* x and y are center position.  dir is 0 to 3, specs orientation */
+    this.dropGlider = function (x, y, dir) {
+        var i, j;
+        var gld = [ [0,0,0,0,0], [0,0,1,0,0], [0,0,0,1,0], [0,1,1,1,0], [0,0,0,0,0]];
+        if (dir & 1) {gld.reverse();}
+        if (dir & 2) {
+            for (i = 0; i < gld.length; i++) {
+                gld[i].reverse();
+            }
+        }
+
+        for (i = 0; i < 5; i++) {
+            for (j = 0; j < 5; j++) {
+                that.alterCell (x + i - 2, y + j - 2, gld[i][j], 0)
+            }
+        }
     }
 
     this.testCellState = function() {
@@ -410,14 +499,22 @@ function CLifer () {
         cR.render(cA.cellState());
     }
 
+    var fCounter = 0;
+
     this.demoLoop = function() {
-        dbg("Demo loop");
-        cA.testCellState();
+        dbg("Demo loop"); 
+        fCounter = 0;
         that.loop2();
     }
 
     this.loop2 = function() {
         gC.physics();
+        fCounter ++;
+        if (fCounter == g.dropCycles) {
+            fCounter = 0;
+            if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
+                {cA.dropBlinker(gC.posX, gC.posY);}
+        }
         cA.cycle();
         cR.render(cA.cellState());
         window.setTimeout(that.loop2, g.frameDelay);
