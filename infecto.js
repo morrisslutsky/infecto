@@ -16,8 +16,8 @@ function graphicSettings() {
     this.cursorRadius = 0.05;
     this.cursorArms = 0.1;
     this.cursorPx = 2.0;
-    this.cursorK = 100.0;
-    this.cursorD = 0.75;
+    this.cursorK = 300.0;
+    this.cursorD = 0.65;
 
     graphicSettings.instance = this;
 }
