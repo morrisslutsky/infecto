@@ -266,6 +266,11 @@ function cellAutomaton() {
     this.getCB = function() {return cb;}
     var gs = new gameSettings();
 
+
+    this.alertNear = false;
+    this.alertLoss = false;
+
+
     this.SPAWN_CLEAR_BOX = 128;
 
     this.cellState = function() {return cb[0].cellState;}
@@ -284,6 +289,7 @@ function cellAutomaton() {
         for (i = 0; i < 128; i++) {
             fadeLUT[i] = i;
         }
+        that.alertNear = that.alertLoss = false; 
     }
 
     this.validXY = function (x, y) {
@@ -347,6 +353,14 @@ function cellAutomaton() {
                     if (n == 3) {
                         nc = (cb[0].p1NCnt[i] > cb[0].p2NCnt[i]) ? 1 : 2;
                         that.alterCell(x, y, nc, 1);
+                        if (nc == 1) {
+                            if ( (x < 5) || (y < 5) || (x > szX-5) || (y > szY-5) ) {
+                                that.alertNear = true;
+                                if ( (x == 0) || (y == 0) || (x == szX-1) || (y == szY-1)) {
+                                    that.alertLoss = true;
+                                }
+                            }
+                        }
                 
                     } 
                 }   else { /* c must be either 1 or 2 */
@@ -505,7 +519,11 @@ function CLifer () {
     this.getGC = function() {return gC;}
 
     function setScaling() {
-        dbg("Resizing window");
+        var clientX, clientY;
+        clientX = document.documentElement.clientWidth;
+        clientY = document.documentElement.clientHeight;
+        dbg("Resizing window " + clientX + ", " + clientY);
+
         cR.resize();
         gC.setScale();
     }
@@ -570,7 +588,13 @@ function CLifer () {
             if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
                 {cA.dropBlinker(gC.posX, gC.posY);}
         }
+        cA.alertNear = cA.alertLoss = false;
         cA.cycle();
+        if (cA.alertNear) {
+            if (cA.alertLoss) {
+                document.getElementById("outer").style.backgroundColor = "#F00";
+            } else {document.getElementById("outer").style.backgroundColor = "#EE0";}
+        } else {document.getElementById("outer").style.backgroundColor="#111";}
         cR.render(cA.cellState());
         window.setTimeout(that.loop2, g.frameDelay);
     }
