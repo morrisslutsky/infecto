@@ -266,6 +266,8 @@ function cellAutomaton() {
     this.getCB = function() {return cb;}
     var gs = new gameSettings();
 
+    this.SPAWN_CLEAR_BOX = 128;
+
     this.cellState = function() {return cb[0].cellState;}
 
     this.init = function() {
@@ -365,6 +367,16 @@ function cellAutomaton() {
         var x1 = Math.round((0.5 + gs.spawnBox) * szX);
         var y0 = Math.round((0.5 - gs.spawnBox) * szY);
         var y1 = Math.round((0.5 + gs.spawnBox) * szY);
+        var a1 = false, a2 = false, a3 = false, a4 = false;
+
+        if (type & that.SPAWN_CLEAR_BOX) {
+            type = type & (~that.SPAWN_CLEAR_BOX);
+            for (x = x0; x < x1; x++) {
+                for (y = y0; y < y1; y++) {
+                    that.alterCell(x, y, 0, 0);
+                }
+            }
+        }
 
         switch (type) {
             case 0: /* random fill */
@@ -388,19 +400,62 @@ function cellAutomaton() {
                         that.dropGlider(x, szY-y, type-1);
                     }
                 }
-                break;
-            case 5: /* 4-way glider flotilla */
+                break; 
+            case 5: /* 2-way glider flotillas */ /* up */
+            case 6: /* down */
+            case 7: /* right */
+            case 8: /* left */
+            case 9: /* 4-way glider flotilla */
+                if (type == 5) {a2 = a4 = true;}
+                if (type == 6) {a1 = a3 = true;}
+                if (type == 7) {a1 = a4 = true;}
+                if (type == 8) {a2 = a3 = true;}
+                if (type == 9) {a1 = a2 = a3 = a4 = true;}
                 for (x = 5 + szX/2; x < x1-2; x += 5) {
                     for (y = 5 + szY/2; y < y1-2; y+= 5) {
-                        that.dropGlider(x,y,0);
-                        that.dropGlider(szX-x, szY-y, 3);
-                        that.dropGlider(szX-x, y, 1);
-                        that.dropGlider(x, szY-y, 2);
+                        if (a1) {that.dropGlider(x,y,0);}
+                        if (a2) {that.dropGlider(szX-x, szY-y, 3);}
+                        if (a3) {that.dropGlider(szX-x, y, 1);}
+                        if (a4) {that.dropGlider(x, szY-y, 2);}
+                    }
+                }
+                break;
+            case 10: /* spaceship flotillas */
+            case 11:
+            case 12:
+            case 13:
+                for (x = szX/2; x < x1-3; x += 7) {
+                    for (y = szY/2; y < y1-3; y+= 7) {
+                        that.dropSpaceship(x,y,type-10);
+                        that.dropSpaceship(szX-x, szY-y, type-10);
+                        that.dropSpaceship(szX-x, y, type-10);
+                        that.dropSpaceship(x, szY-y, type-10);
                     }
                 }
                 break;
         }
     }
+
+    /* x and y are center position.  dir is 0 to 3, specs orientation */
+    this.dropSpaceship = function (x, y, dir) {
+        var i, j;
+        var spc = [ [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,1,1,1,1,0], 
+                    [0,1,0,0,0,1,0], [0,0,0,0,0,1,0], [0,1,0,0,1,0,0],
+                    [0,0,0,0,0,0,0]];
+        if (dir & 1) {
+            for (i = 0; i < spc.length; i++) {
+                spc[i].reverse();
+            }
+        }
+
+        for (i = 0; i < 7; i++) {
+            for (j = 0; j < 7; j++) {
+                if (dir & 2) {that.alterCell (x + i - 3, y + j - 3, spc[j][i], 0);}
+                else {that.alterCell (x + i - 3, y + j - 3, spc[i][j], 0);}
+            }
+        }
+    }
+
 
     /* x and y are center position.  dir is 0 to 3, specs orientation */
     this.dropGlider = function (x, y, dir) {
