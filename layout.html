@@ -11,19 +11,16 @@ html, body{
      overflow:hidden;
      touch-action:none;
      position: relative;
-     background-color: green;
      margin:0;
 }
 
 #outer {
     margin: 0px;
     padding: 16px;
-    background-color: #111;   
     visibility: visible;
 }
 
 #container {
-	background-color: #A00;
     border: 0px;
     padding: 0px;
     margin-top: 0;
@@ -32,6 +29,14 @@ html, body{
     width: 256px;
     height: 256px;
     visibility: visible;
+    /* border: 4px groove #888;
+    border-radius: 8px; */
+
+}
+
+button {
+	position: absolute;
+	visibility: hidden;
 }
 
 canvas {
@@ -55,7 +60,7 @@ canvas {
 <canvas id="cells" width="192" height="192"></canvas>   
 <canvas id="overlay" > </canvas>
 </DIV>
-
+<button id="btn_menu"><img id="img_menu" src="img/arrow.png"></button>
 </div>
 </body>  
 </html>  

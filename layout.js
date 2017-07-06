@@ -6,6 +6,8 @@ function Layout() {
 	var that = this;
 
 	this.padding = 16;
+	this.border = 4;
+
 
 	this.testPattern = function() {
 		dbg("Writing test pattern to 'cells' and 'overlay' canvases.");
@@ -73,18 +75,46 @@ function Layout() {
 		return [viewportwidth, viewportheight];
 	}
 
+	this.putButton = function(name, x, y, w, h) {
+		var butn = 'btn_' + name;  var imgn = 'img_' + name;
+		document.getElementById(imgn).style.width = w;
+		document.getElementById(imgn).style.height = h;
+		document.getElementById(butn).style.top = y;
+		document.getElementById(butn).style.left = x;
+		document.getElementById(butn).style.visibility = "visible";
+	}
+
 	this.doLayout = function () {
+		document.getElementById("thebody").style.backgroundColor = "green";
+		document.getElementById("outer").style.backgroundColor = "#111111"
+
 		var vp = that.getViewPort();
 		var squ = Math.min (vp[0], vp[1]);
+
+		var bor = Math.round(that.border * squ / 600.0);
+		document.getElementById("container").style.borderWidth=bor+"px";
+		document.getElementById("container").style.borderStyle="solid";
+		document.getElementById("container").style.borderColor="#444444";
+		document.getElementById("container").style.borderRadius=bor*2+"px";
 		var pad = Math.round(that.padding * (squ/600.0));
 		squ -= 2 * pad;
+		pad -= bor;
 		var id = ["container", "cells", "overlay"];
 		var i, e;
 		e = document.getElementById("outer");
 		outer.style.padding = pad;
+		outer.style.height = vp[1];
 		for (i = 0; i < id.length; i++) {
 			e = document.getElementById(id[i]);
 			e.style.width = squ; e.style.height = squ;
+		}
+
+		/* the big choice */
+		if (vp[0] > vp[1]) {
+			/* landscape layout */
+			dbg ("landscape layout");
+		} else {
+			/* portrait layout */
 		}
 	}
 
