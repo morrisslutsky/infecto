@@ -34,11 +34,22 @@ html, body{
 
 }
 
+img {
+	padding: 0;
+	margin: 0;
+}
+
 button {
 	position: absolute;
 	visibility: hidden;
+	padding: 0;
+	margin: 0;
 }
 
+.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 canvas {
 	width: 256px;
 	height: 256px;
@@ -60,6 +71,10 @@ canvas {
 <canvas id="cells" width="192" height="192"></canvas>   
 <canvas id="overlay" > </canvas>
 </DIV>
+<button id="btn_bomb"><img id="img_bomb" src="img/bomb.png"></button>
+<button id="btn_trash"><img id="img_trash" src="img/trash.png"></button>
+<button id="btn_clock"><img id="img_clock" src="img/clock.png"></button>
+<button id="btn_shield"><img id="img_shield" src="img/shield.png"></button>
 <button id="btn_menu"><img id="img_menu" src="img/arrow.png"></button>
 </div>
 </body>  

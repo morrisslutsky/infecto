@@ -5,9 +5,14 @@ function dbg(A) {
 function Layout() {
 	var that = this;
 
+	/* minimum space needed for sides in LS view or bottom bar in PT view */
+	this.minimumSideW = 70;
+
 	this.padding = 16;
 	this.border = 4;
 
+	this.buttonSize = 25; /* minimum, scales up with resolution though */
+	this.buttonBorder = 3;
 
 	this.testPattern = function() {
 		dbg("Writing test pattern to 'cells' and 'overlay' canvases.");
@@ -77,11 +82,26 @@ function Layout() {
 
 	this.putButton = function(name, x, y, w, h) {
 		var butn = 'btn_' + name;  var imgn = 'img_' + name;
-		document.getElementById(imgn).style.width = w;
-		document.getElementById(imgn).style.height = h;
-		document.getElementById(butn).style.top = y;
-		document.getElementById(butn).style.left = x;
+		var bb = Math.round(this.buttonBorder * (w/25.0));
+		document.getElementById(butn).style.borderWidth = bb;
+		x-=bb; y-=bb;
+		document.getElementById(imgn).style.width = Math.round(w);
+		document.getElementById(imgn).style.height = Math.round(h);
+		document.getElementById(butn).style.top = Math.round(y);
+		document.getElementById(butn).style.left = Math.round(x);
 		document.getElementById(butn).style.visibility = "visible";
+		document.getElementById(butn).disabled = "true";
+	}
+
+	this.enableButton = function(name, val) {
+		var e = document.getElementById("btn_"+name);
+		if (val) {
+			e.disabled = false;
+			e.style.opacity = 1.0;
+		} else {
+			e.disabled = true;
+			e.style.opacity = 0.5;
+		}
 	}
 
 	this.doLayout = function () {
@@ -99,6 +119,13 @@ function Layout() {
 		var pad = Math.round(that.padding * (squ/600.0));
 		squ -= 2 * pad;
 		pad -= bor;
+
+		var sideW = Math.max(vp[0],vp[1]) - (2 * (pad + bor) + squ);
+		var dsW = that.minimumSideW - sideW;
+		if (dsW > 0) {
+			squ -= dsW;
+		}
+
 		var id = ["container", "cells", "overlay"];
 		var i, e;
 		e = document.getElementById("outer");
@@ -109,13 +136,42 @@ function Layout() {
 			e.style.width = squ; e.style.height = squ;
 		}
 
+		var bS = that.buttonSize;
+		dbg("buttonsize: " + bS);
+		if (squ > 350) {bS = Math.round (bS * squ / 350.0);}
+
+		var x, xx, y;
+		var bnames = ["bomb", "trash", "clock", "shield", "", "menu"];
 		/* the big choice */
 		if (vp[0] > vp[1]) {
 			/* landscape layout */
 			dbg ("landscape layout");
+			if (dsW > 0) {
+				var tstr = "translateY("+Math.round(dsW/2) + "px)";
+				dbg("Shift playfield down by " + tstr);
+				document.getElementById("container").style.transform = tstr;
+			}
 		} else {
 			/* portrait layout */
+			/* [pad] B1 B2 B3 B4 [No Button] [BMenu] [pad] */
+			y = vp[1] - (bS + pad); //squ + 2 * pad + 2*bor;
+			x = squ; //vp[0] - 2*pad; /* = 6*bS + 5 * spacing */
+			x = (x-bS)/5.0; /* now x = bS + spacing! */
+			xx = vp[0] * 0.5; /* halfway between B3 left and B4 right */
+			xx -= (2.5*x + 0.5 * bS);
+			for (i=0; i < bnames.length; i++) {
+				if (bnames[i].length > 0) {
+					that.putButton(bnames[i], xx, y, bS, bS);
+				}
+				xx += x;
+			}
+
 		}
+		that.enableButton("bomb", false);
+		that.enableButton("clock", false);
+		that.enableButton("trash", false);
+		that.enableButton("shield", false);
+		that.enableButton("menu", true);
 	}
 
 	this.init = function() {
