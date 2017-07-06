@@ -165,6 +165,21 @@ function Layout() {
 				}
 				xx += x;
 			}
+			e = document.getElementById("textLine");
+			e.style.borderWidth=bor+"px";
+			e.style.borderStyle="solid";
+			e.style.borderColor="#444444";
+			e.style.backgroundColor="#666666";
+			e.style.borderRadius=bor*2+"px";
+			e.style.fontSize = Math.round(bS * 16 / 25);
+			e.style.color = "#880000";
+			e.style.textAlign = "center";
+			e.style.top = squ + pad + 2*bor;
+			e.style.left = (vp[0]-squ) * 0.5 - bor;
+			e.style.width = squ;
+			e.style.height = y - e.style.top;
+			e.style.height -= bor;
+			e.style.visibility = 'visible';
 
 		}
 		that.enableButton("bomb", false);
