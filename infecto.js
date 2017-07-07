@@ -542,7 +542,7 @@ function CLifer () {
         document.addEventListener("touchmove", function(e) {e.preventDefault();}, true);
 
         var ele;
-        var ename = ["overlay", "playfield", "cells", "container", "outer"];
+        var ename = ["overlay", "cells", "container", "outer"];
         for (var i = 0; i < ename.length; i++) {
             ele = document.getElementById(ename[i]);
             if (ele) {

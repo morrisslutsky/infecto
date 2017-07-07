@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 
 
-<TITLE>LIFE Invaders Dynamic Layout Test</TITLE>
+<TITLE>LIFE Invaders Rewrite</TITLE>
 
 <style type="text/css">
 
@@ -66,18 +66,18 @@ b {
 }
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <script src="layout.js"></script> 
-
+<script src="layout.js"></script> 
+<script src="infecto.js"></script> 
 </head>  
 
-<body id="thebody" onload="LAYOUT.init();" >  
+<body id="thebody" onload="LAYOUT.init(); LIFER.init();" >  
 
 <DIV id = "outer">
 <DIV id="container">
 <canvas id="cells" width="192" height="192"></canvas>   
 <canvas id="overlay" > </canvas>
 </DIV>
-<b id="textLine">Level 1: Don't Eat That Turd</b>
+<b id="textLine">Level 1: Testing</b>
 <button id="btn_bomb"><img id="img_bomb" src="img/bomb.png"></button>
 <button id="btn_trash"><img id="img_trash" src="img/trash.png"></button>
 <button id="btn_clock"><img id="img_clock" src="img/clock.png"></button>
