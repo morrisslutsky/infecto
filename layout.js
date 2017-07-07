@@ -6,7 +6,7 @@ function Layout() {
 	var that = this;
 
 	/* minimum space needed for sides in LS view or bottom bar in PT view */
-	this.minimumSideW = 70;
+	this.minimumSideW = 80;
 
 	this.padding = 16;
 	this.border = 4;
@@ -49,6 +49,17 @@ function Layout() {
         ctx.lineTo(0, szY);
         ctx.stroke();
 	}
+
+	this.disableSelection = function (element) {
+		/* from https://stackoverflow.com/questions/2310734/how-to-make-html-text-unselectable */
+            if (typeof element.onselectstart != 'undefined') {
+                element.onselectstart = function() { return false; };
+            } else if (typeof element.style.MozUserSelect != 'undefined') {
+    	        element.style.MozUserSelect = 'none';
+            } else {
+            element.onmousedown = function() { return false; };
+        }
+    }
 
 	this.getViewPort = function() {
 		/* from https://andylangton.co.uk/blog/development/get-viewportwindow-size-width-and-height-javascript */
@@ -109,6 +120,8 @@ function Layout() {
 		document.getElementById("outer").style.backgroundColor = "#111111"
 
 		var vp = that.getViewPort();
+		/* calculate playfield maximum size:  how big a square can fit in window? */
+		/* need to leave 'minimumSideW' pixels either to bottom (portrait) or sides (landscape) */
 		var squ = Math.min (vp[0], vp[1]);
 
 		var bor = Math.round(that.border * squ / 600.0);
@@ -126,6 +139,7 @@ function Layout() {
 			squ -= dsW;
 		}
 
+		/* set up playfield */
 		var id = ["container", "cells", "overlay"];
 		var i, e;
 		e = document.getElementById("outer");
@@ -136,11 +150,26 @@ function Layout() {
 			e.style.width = squ; e.style.height = squ;
 		}
 
+		/* calculate button size */
 		var bS = that.buttonSize;
 		dbg("buttonsize: " + bS);
 		if (squ > 350) {bS = Math.round (bS * squ / 350.0);}
 
-		var x, xx, y;
+		/* format text area */
+		e = document.getElementById("textLine");
+		e.style.borderWidth=bor+"px";
+		e.style.borderStyle="solid";
+		e.style.borderColor="#444444";
+		e.style.backgroundColor="#777777";
+		e.style.borderRadius=bor*2+"px";
+		e.style.fontSize = Math.round(bS * 16 / 25);
+		e.style.color = "#CC0000";
+		e.style.textAlign = "center";
+		that.disableSelection(e);
+			
+		/* lay out buttons and text area, depending upon portrait/landscape orientation */
+
+		var x, xx, y, yy;
 		var bnames = ["bomb", "trash", "clock", "shield", "", "menu"];
 		/* the big choice */
 		if (vp[0] > vp[1]) {
@@ -151,6 +180,28 @@ function Layout() {
 				dbg("Shift playfield down by " + tstr);
 				document.getElementById("container").style.transform = tstr;
 			}
+
+			x = (vp[0] - (squ + bor)) * 0.25;
+			x -= bS*0.5;
+			y = (vp[1] - squ) * 0.5 + (dsW>0? dsW*0.25 : 0);
+			/* [pad] [B1] [B2] [B3][B4] [pad] */
+			yy = (squ - bS) / 3.0; /* bS*4 + 3 * (spacer) = squ */
+			for (i=0; i < 4; i++) {
+				if (bnames[i].length > 0) {
+					that.putButton(bnames[i], x, y, bS, bS);
+				}
+				y += yy;
+			}
+			x = Math.min(vp[0] - x, vp[0] - (bS + pad + bor));
+			that.putButton("menu", x, y-yy, bS, bS);
+			y = (vp[1] - squ) * 0.5 + (dsW>0? dsW*0.25 : 0);
+			e = document.getElementById("textLine");
+			e.style.top = y - bor;
+			x = (vp[0] - (squ + bor)) * 0.5 + squ + 2*bor;
+			e.style.left = x;
+			e.style.width = vp[0] - (x + 3*bor);
+			//e.style.height = Math.round(bS * 16 / 25) + 2*bor;
+			e.style.visibility = 'visible';
 		} else {
 			/* portrait layout */
 			/* [pad] B1 B2 B3 B4 [No Button] [BMenu] [pad] */
@@ -165,15 +216,8 @@ function Layout() {
 				}
 				xx += x;
 			}
+
 			e = document.getElementById("textLine");
-			e.style.borderWidth=bor+"px";
-			e.style.borderStyle="solid";
-			e.style.borderColor="#444444";
-			e.style.backgroundColor="#666666";
-			e.style.borderRadius=bor*2+"px";
-			e.style.fontSize = Math.round(bS * 16 / 25);
-			e.style.color = "#880000";
-			e.style.textAlign = "center";
 			e.style.top = squ + pad + 2*bor;
 			e.style.left = (vp[0]-squ) * 0.5 - bor;
 			e.style.width = squ;
