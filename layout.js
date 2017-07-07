@@ -101,7 +101,7 @@ function Layout() {
 		document.getElementById(butn).style.top = Math.round(y);
 		document.getElementById(butn).style.left = Math.round(x);
 		document.getElementById(butn).style.visibility = "visible";
-		document.getElementById(butn).disabled = "true";
+		//document.getElementById(butn).disabled = "true";
 	}
 
 	this.enableButton = function(name, val) {
@@ -226,11 +226,7 @@ function Layout() {
 			e.style.visibility = 'visible';
 
 		}
-		that.enableButton("bomb", false);
-		that.enableButton("clock", false);
-		that.enableButton("trash", false);
-		that.enableButton("shield", false);
-		that.enableButton("menu", true);
+		
 	}
 
 	this.init = function() {
@@ -239,6 +235,11 @@ function Layout() {
 		that.testPattern();
 		/* do the actual layout! */
 		that.doLayout();
+		that.enableButton("bomb", false);
+		that.enableButton("clock", false);
+		that.enableButton("trash", false);
+		that.enableButton("shield", false);
+		that.enableButton("menu", true);
 	}
 
 }

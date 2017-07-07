@@ -523,7 +523,7 @@ function CLifer () {
         clientX = document.documentElement.clientWidth;
         clientY = document.documentElement.clientHeight;
         dbg("Resizing window " + clientX + ", " + clientY);
-
+        LAYOUT.doLayout();
         cR.resize();
         gC.setScale();
     }
