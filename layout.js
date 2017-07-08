@@ -166,7 +166,14 @@ function Layout() {
 		e.style.color = "#CC0000";
 		e.style.textAlign = "center";
 		that.disableSelection(e);
-			
+
+		/* set up popup DIV */
+		e = document.getElementById("popup");
+		e.style.width = squ + "px";
+		e.style.fontSize = Math.round(bS);
+		e = document.getElementById("popup-content");
+		e.style.borderWidth = bor + "px";
+
 		/* lay out buttons and text area, depending upon portrait/landscape orientation */
 
 		var x, xx, y, yy;
@@ -229,10 +236,29 @@ function Layout() {
 		
 	}
 
+	this.popup = function(bShow, sMessage, timer) {
+		var e = document.getElementById("popup");
+		if (!bShow) {e.style.display = 'none'; return;}
+		document.getElementById("popup-text").innerText = sMessage;
+		if (timer <= 0) {
+			document.getElementById("popup-close").style.visibility = 'visible';
+		} else {
+			document.getElementById("popup-close").style.visibility = 'hidden';
+		}
+		e.style.display = 'block';
+		var closeMe = function() {that.popup(false,"",0);}
+		if (timer > 0) {
+			window.setTimeout(closeMe, timer);
+		} else {
+			document.getElementById("popup-close").onclick = closeMe;
+			document.getElementById("popup-close").addEventListener("touchstart", closeMe, true);
+		}
+	}
+
 	this.init = function() {
 		dbg ("initializing layout");
 		/* writing test pattern to cells */
-		that.testPattern();
+		//that.testPattern();
 		/* do the actual layout! */
 		that.doLayout();
 		that.enableButton("bomb", false);

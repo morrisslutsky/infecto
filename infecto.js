@@ -548,9 +548,10 @@ function CLifer () {
             if (ele) {
                 ele.addEventListener("mousemove", that.onMouseMove, true);
                 ele.addEventListener("touchmove", that.onTouchMove, true);
-                ele.addEventListener("touchstart", that.onTouchMove, true);
+                ele.addEventListener("touchstart", that.onTouchMove, false);
             }
         }
+        LAYOUT.popup(true, "Test Me", 0);
         this.demoLoop();
     }
   

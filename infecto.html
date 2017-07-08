@@ -51,8 +51,7 @@ button {
     cursor: not-allowed;
 }
 canvas {
-	width: 256px;
-	height: 256px;
+
     position: absolute;
     visibility: visible;
     margin: auto;
@@ -64,6 +63,56 @@ b {
 	border: 2px solid #444444;
 	visibility: hidden;
 }
+
+ /* The Modal (background) */
+.popup {
+    display: none; /* Hidden by default */
+    position: relative; 
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: hidden; /* Enable scroll if needed */
+    background-color: none; /* Black w/ opacity */
+}
+
+.popup-text {
+    text-align: center;
+    color: #FFFFDD;
+}
+
+/* Modal Content/Box */
+.popup-content {
+    position: relative;
+    background-color: #000000;
+    background-color: rgba(0,0,0,0.7);
+    margin: auto; 
+    padding: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid rgba(128,128,0,0.6);
+    border-radius: 5%;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    visibility: hidden;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+} 
+
+
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="layout.js"></script> 
@@ -76,7 +125,14 @@ b {
 <DIV id="container">
 <canvas id="cells" width="192" height="192"></canvas>   
 <canvas id="overlay" > </canvas>
+    <DIV id="popup" class="popup">
+        <div id = "popup-content" class="popup-content">
+            <span class="close" id ="popup-close">&times;</span>
+            <p id="popup-text" class="popup-text" >I'm a popup.</p>
+        </div>
+    </DIV>
 </DIV>
+
 <b id="textLine">Level 1: Testing</b>
 <button id="btn_bomb"><img id="img_bomb" src="img/bomb.png"></button>
 <button id="btn_trash"><img id="img_trash" src="img/trash.png"></button>
