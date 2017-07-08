@@ -94,9 +94,15 @@ b {
     border: 1px solid rgba(128,128,0,0.6);
     border-radius: 5%;
     width: 80%; /* Could be more or less, depending on screen size */
+    overflow: auto;
 }
 
-/* The Close Button */
+/* Dialog Buttons */
+
+.popup-okcancel {
+    display: none;
+}
+
 .close {
     color: #aaa;
     float: right;
@@ -105,12 +111,41 @@ b {
     visibility: hidden;
 }
 
-.close:hover,
-.close:focus {
-    color: black;
+.ok {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
+    border: 2px solid #880;
+    border-radius: 5%;
+    background-color: #440;
+    background-color: rgba(255,255,0,0.25);
+    padding: 1%;
+}
+
+.cancel {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    border: 2px solid #880;
+    border-radius: 5%;
+    background-color: #440;
+    background-color: rgba(255,255,0,0.25);
+    padding: 1%;
+}
+
+.ok:hover, .cancel:hover, .ok:focus, .cancel:focus {
+    color: white;
+    background-color: #880;
+}
+
+.close:hover, .close:focus {
+    color: red;
     text-decoration: none;
     cursor: pointer;
 } 
+
 
 
 </style>
@@ -129,6 +164,10 @@ b {
         <div id = "popup-content" class="popup-content">
             <span class="close" id ="popup-close">&times;</span>
             <p id="popup-text" class="popup-text" >I'm a popup.</p>
+         <div id = "popup-okcancel" class="popup-okcancel">
+                <span class="ok" id="popup-ok">OK</span>
+                <span class="cancel" id="popup-cancel">Cancel</span>
+        </div>
         </div>
     </DIV>
 </DIV>

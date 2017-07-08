@@ -56,9 +56,10 @@ function Layout() {
                 element.onselectstart = function() { return false; };
             } else if (typeof element.style.MozUserSelect != 'undefined') {
     	        element.style.MozUserSelect = 'none';
-            } else {
-            element.onmousedown = function() { return false; };
-        }
+            } 
+            //else {
+            //element.onmousedown = function() { return false; };
+        	//}
     }
 
 	this.getViewPort = function() {
@@ -174,6 +175,9 @@ function Layout() {
 		e = document.getElementById("popup-content");
 		e.style.borderWidth = bor + "px";
 
+		that.disableSelection(document.getElementById("popup-ok"));
+		that.disableSelection(document.getElementById("popup-cancel"));
+
 		/* lay out buttons and text area, depending upon portrait/landscape orientation */
 
 		var x, xx, y, yy;
@@ -245,6 +249,7 @@ function Layout() {
 		} else {
 			document.getElementById("popup-close").style.visibility = 'hidden';
 		}
+		document.getElementById("popup-okcancel").style.display = 'none';
 		e.style.display = 'block';
 		var closeMe = function() {that.popup(false,"",0);}
 		if (timer > 0) {
@@ -253,6 +258,29 @@ function Layout() {
 			document.getElementById("popup-close").onclick = closeMe;
 			document.getElementById("popup-close").addEventListener("touchstart", closeMe, true);
 		}
+	}
+
+	this.lastChoice = -1;
+	
+	/* note:  callback may be fired multiple times.  */
+	this.choices = function(bShow, sMessage, okText, cancelText, callback) {
+		var e = document.getElementById("popup");
+		if (!bShow) {e.style.display = 'none'; return;}
+		that.lastChoice = -1; 
+		document.getElementById("popup-text").innerText = sMessage;
+		document.getElementById("popup-ok").innerText = okText;
+		document.getElementById("popup-cancel").innerText = cancelText;
+		document.getElementById("popup-okcancel").style.display = 'block';
+		e.style.display='block';
+		var defaultCallback = function (choice) {that.lastChoice = choice;}
+		if (callback == null) {callback = defaultCallback;}
+		var closeMe = function() {that.choices(false, "", "", "", null);}
+		var callOK = function() {closeMe(); callback(0);}
+		var callCancel = function() {closeMe(); callback(1);}
+		document.getElementById("popup-ok").onclick = callOK;
+		document.getElementById("popup-ok").addEventListener("touchstart", callOK, true);
+		document.getElementById("popup-cancel").onclick = callCancel;
+		document.getElementById("popup-cancel").addEventListener("touchstart", callCancel, true);
 	}
 
 	this.init = function() {

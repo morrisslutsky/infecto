@@ -551,7 +551,7 @@ function CLifer () {
                 ele.addEventListener("touchstart", that.onTouchMove, false);
             }
         }
-        LAYOUT.popup(true, "Test Me", 0);
+        LAYOUT.choices(true, "Test Me", "Eat Poop", "Don't Eat Poop", null);
         this.demoLoop();
     }
   
