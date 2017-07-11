@@ -8,19 +8,22 @@ function graphicSettings() {
     if (typeof graphicSettings.instance === 'object') {
         return graphicSettings.instance;
     }
-    this.p1Color = 0xFF1020;
-    this.p2Color = 0x20FF00;
-    this.bgColor = 0x100030;
-    this.fadestep = 3;
-    this.cursorColor = 0xE0F0F0;
-    this.cursorRadius = 0.05;
-    this.cursorArms = 0.1;
-    this.cursorPx = 2.0;
-    this.cursorK = 300.0;
-    this.cursorD = 0.65;
-    this.boxColor = 0xC0C0F0;
-    this.boxPx = 3.0;
-
+    var that = this;
+    this.defaults = function () {
+        that.p1Color = 0xFF1020;
+        that.p2Color = 0x20FF00;
+        that.bgColor = 0x100030;
+        that.fadestep = 3;
+        that.cursorColor = 0xE0F0F0;
+        that.cursorRadius = 0.05;
+        that.cursorArms = 0.1;
+        that.cursorPx = 2.0;
+        that.cursorK = 300.0;
+        that.cursorD = 0.65;
+        that.boxColor = 0xC0C0F0;
+        that.boxPx = 3.0;
+    }
+    that.defaults();
     graphicSettings.instance = this;
 }
 
@@ -29,12 +32,14 @@ function gameSettings() {
     if (typeof gameSettings.instance === 'object') {
         return gameSettings.instance;
     }
-
-    this.spawnBox = 0.25;
-    this.dropCycles = 1;
-    this.spawnCycles = 500;
-    this.frameDelay = 40;
-
+    var that = this;
+    this.defaults = function() {
+        that.spawnBox = 0.25;
+        that.dropCycles = 1;
+        that.spawnCycles = 500;
+        that.frameDelay = 40;
+    }
+    that.defaults();
     gameSettings.instance = this;
 }
 
