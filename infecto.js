@@ -22,6 +22,8 @@ function graphicSettings() {
         that.cursorD = 0.65;
         that.boxColor = 0xC0C0F0;
         that.boxPx = 3.0;
+        that.lostColor = 'rgba(255,255,0,0.5)';
+        that.lostRadius = 0.2;
     }
     that.defaults();
     graphicSettings.instance = this;
@@ -56,6 +58,12 @@ function gameCursor() {
 
     var tX = 0.5; var tY = 0.5;
     var vX = 0; var vY = 0;
+
+    var lostX; var lostY;
+    var lostMarker = false;
+
+    this.setLostMarker = function (x,y) {lostMarker = true; lostX = x; lostY = y;}
+    this.clearLostMarker = function() {lostMarker = false;}
 
     this.moveCursor = function (nX, nY) {
         tX = nX; tY = nY;
@@ -107,6 +115,13 @@ function gameCursor() {
             ctx.stroke();
         }
 
+        if (lostMarker) {
+            ctx.beginPath();
+            ctx.arc(lostX * cX, lostY * cY, g.lostRadius * cX * 0.5, 0, 6.2831853);
+            ctx.fillStyle = g.lostColor;
+            ctx.fill();
+        }
+
         ctx.strokeStyle = "#" + g.cursorColor.toString(16);
         ctx.lineWidth = g.cursorPx * 1.0 * cX / 384.0;
         var dx = g.cursorArms * cX * 0.5;
@@ -127,7 +142,7 @@ function gameCursor() {
         that.setScale();
         posX = posY = tX = tY = 0.5;
         vX = vY = 0;
-
+        lostMarker = false;
     }
 }
 
@@ -274,7 +289,12 @@ function cellAutomaton() {
 
     this.alertNear = false;
     this.alertLoss = false;
+    var lostX = 0;  var lostY = 0;
 
+    this.lostCoord = function() {
+        if (!that.alertLoss) return null;
+        return [(lostX * 1.0 )/ szX, (lostY * 1.0) / szY];
+    }
 
     this.SPAWN_CLEAR_BOX = 128;
 
@@ -362,7 +382,7 @@ function cellAutomaton() {
                             if ( (x < 5) || (y < 5) || (x > szX-5) || (y > szY-5) ) {
                                 that.alertNear = true;
                                 if ( (x == 0) || (y == 0) || (x == szX-1) || (y == szY-1)) {
-                                    that.alertLoss = true;
+                                    that.alertLoss = true; lostX = x; lostY = y; 
                                 }
                             }
                         }
@@ -560,16 +580,18 @@ function CLifer () {
             }
             firstRun = false;
         }
+        document.getElementById("outer").style.backgroundColor="#111";
         cR.init();
         setScaling();
         gC.init();
         cA.init();
         cA.testCellState();
         that.level = 0;
-        that.promptGo("Welcome to CellFence.  Start Game", function() {that.playLevel();});
+        that.promptGo("Welcome to CellFence.  Start Game", that.playLevel);
     }
 
     this.playLevel = function() {
+        document.getElementById("outer").style.backgroundColor="#111";
         dbg ("Starting level " + (1 + that.level));
         document.getElementById("textLine").innerText = "Level: " + (1 + that.level);
         var lData = LEVELS[that.level];
@@ -589,6 +611,7 @@ function CLifer () {
         cA.init(); 
         gC.physics(); 
         frameCount = 0;
+        cA.alertLoss = false;
         that.runLevel();
     }
 
@@ -596,7 +619,7 @@ function CLifer () {
         var cmd = LEVELS[that.level].sequence[frameCount];
         if (cmd) {
             if (cmd[0] == "PROMPT") {
-                LAYOUT.popup(true, cmd[1], 800);
+                LAYOUT.popup(true, cmd[1], 1000);
             }
             if (cmd[0] == "SPAWN") {
                 cA.spawnCells(cmd[1]);
@@ -615,22 +638,27 @@ function CLifer () {
         gC.physics();
         if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
                 {cA.dropBlinker(gC.posX, gC.posY);}
-        cA.alertNear = cA.alertLoss = false;
+        cA.alertNear = false;
         cA.cycle();
-        if (cA.alertNear) {
-            if (cA.alertLoss) {
+        if (cA.alertLoss) {
                 document.getElementById("outer").style.backgroundColor = "#F00";
-            } else {document.getElementById("outer").style.backgroundColor = "#EE0";}
+        } else if (cA.alertNear) {
+             document.getElementById("outer").style.backgroundColor = "#EE0";
         } else {document.getElementById("outer").style.backgroundColor="#111";}
         cR.render(cA.cellState());
         frameCount++;
-        window.setTimeout(that.runLevel, g.frameDelay);
+        if (cA.alertLoss) {
+            var lC = cA.lostCoord();  gC.setLostMarker(lC[0], lC[1]);
+            that.promptGo("Enemy cells escaped.  Restart game", that.init);
+        } else {
+            window.setTimeout(that.runLevel, g.frameDelay);
+        }
     }
 
     var continuation = null;
 
     this.promptGo = function (prompt, nextcall) {
-        LAYOUT.choices(true, prompt, "OK", "", null);
+        LAYOUT.choices(true, prompt, "OK", "");
         continuation = nextcall;
         that.promptLoop();
     }
@@ -666,30 +694,6 @@ function CLifer () {
     }
 
     var fCounter = 0;
-
-    this.demoLoop = function() {
-        fCounter = 0;
-        that.loop2();
-    }
-
-    this.loop2 = function() {
-        gC.physics();
-        fCounter ++;
-        if (fCounter == g.dropCycles) {
-            fCounter = 0;
-            if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
-                {cA.dropBlinker(gC.posX, gC.posY);}
-        }
-        cA.alertNear = cA.alertLoss = false;
-        cA.cycle();
-        if (cA.alertNear) {
-            if (cA.alertLoss) {
-                document.getElementById("outer").style.backgroundColor = "#F00";
-            } else {document.getElementById("outer").style.backgroundColor = "#EE0";}
-        } else {document.getElementById("outer").style.backgroundColor="#111";}
-        cR.render(cA.cellState());
-        window.setTimeout(that.loop2, g.frameDelay);
-    }
 
     dbg("Constructed LIFER Object");
 }

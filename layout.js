@@ -242,6 +242,7 @@ function Layout() {
 
 	this.popup = function(bShow, sMessage, timer) {
 		var e = document.getElementById("popup");
+		if (that.choiceBox) return;
 		if (!bShow) {e.style.display = 'none'; return;}
 		document.getElementById("popup-text").innerText = sMessage;
 		if (timer <= 0) {
@@ -251,7 +252,7 @@ function Layout() {
 		}
 		document.getElementById("popup-okcancel").style.display = 'none';
 		e.style.display = 'block';
-		var closeMe = function() {that.popup(false,"",0);}
+		function closeMe() {that.popup(false,"",0);}
 		if (timer > 0) {
 			window.setTimeout(closeMe, timer);
 		} else {
@@ -262,12 +263,14 @@ function Layout() {
 
 	this.lastChoice = -1;
 	
-	/* note:  callback may be fired multiple times.  */
-	this.choices = function(bShow, sMessage, okText, cancelText, callback) {
+	this.choiceBox = false;
+
+	this.choices = function(bShow, sMessage, okText, cancelText) {
 		var e = document.getElementById("popup");
-		if (!bShow) {e.style.display = 'none'; return;}
+		if (!bShow) {that.choiceBox = false; e.style.display = 'none'; return;}
 		that.popup(false,"",0);
 		that.lastChoice = -1; 
+		that.choiceBox = true;
 		document.getElementById("popup-text").innerText = sMessage;
 		document.getElementById("popup-ok").innerText = okText;
 		document.getElementById("popup-cancel").innerText = cancelText;
@@ -278,11 +281,9 @@ function Layout() {
 		}
 		document.getElementById("popup-okcancel").style.display = 'block';
 		e.style.display='block';
-		var defaultCallback = function (choice) {that.lastChoice = choice;}
-		if (callback == null) {callback = defaultCallback;}
-		var closeMe = function() {that.choices(false, "", "", "", null);}
-		var callOK = function() {closeMe(); callback(0);}
-		var callCancel = function() {closeMe(); callback(1);}
+		function closeMe() {that.choices(false, "", "", "", null);}
+		function callOK() {closeMe(); that.lastChoice=0;}
+		function callCancel() {closeMe(); that.lastChoice=1;}
 		document.getElementById("popup-ok").onclick = callOK;
 		document.getElementById("popup-ok").addEventListener("touchstart", callOK, true);
 		document.getElementById("popup-cancel").onclick = callCancel;
