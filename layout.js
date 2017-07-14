@@ -266,10 +266,16 @@ function Layout() {
 	this.choices = function(bShow, sMessage, okText, cancelText, callback) {
 		var e = document.getElementById("popup");
 		if (!bShow) {e.style.display = 'none'; return;}
+		that.popup(false,"",0);
 		that.lastChoice = -1; 
 		document.getElementById("popup-text").innerText = sMessage;
 		document.getElementById("popup-ok").innerText = okText;
 		document.getElementById("popup-cancel").innerText = cancelText;
+		if (cancelText == "") {
+			document.getElementById("popup-cancel").style.visibility = 'hidden';
+		} else {
+			document.getElementById("popup-cancel").style.visibility = 'visible';
+		}
 		document.getElementById("popup-okcancel").style.display = 'block';
 		e.style.display='block';
 		var defaultCallback = function (choice) {that.lastChoice = choice;}

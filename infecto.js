@@ -36,7 +36,6 @@ function gameSettings() {
     this.defaults = function() {
         that.spawnBox = 0.25;
         that.dropCycles = 1;
-        that.spawnCycles = 500;
         that.frameDelay = 40;
     }
     that.defaults();
@@ -100,6 +99,7 @@ function gameCursor() {
 
         var spawnBox = new gameSettings().spawnBox;
         if (spawnBox) {
+            ctx.beginPath();
             ctx.rect(parseInt(cX*(0.5-spawnBox)), parseInt(cY*(0.5-spawnBox)),
                     parseInt(cX*spawnBox*2), parseInt(cY*spawnBox*2));
             ctx.strokeStyle = "#" + g.boxColor.toString(16);
@@ -510,7 +510,11 @@ function cellAutomaton() {
 
 function CLifer () {
 
-    var that = this;    
+    var that = this;   
+
+    this.level = 0; 
+    var frameCount = 0;
+
     var g = new gameSettings();
     this.getGS = function () {return g;}
     
@@ -533,32 +537,115 @@ function CLifer () {
         gC.setScale();
     }
 
+    var firstRun = true;
+
     this.init = function() {
-        dbg("Initializing LIFER Object");
+
+        if (firstRun) {
+            window.addEventListener("resize", setScaling);
+            window.addEventListener("touchmove", function(e) {e.preventDefault();});
+            document.addEventListener("onscroll", function(e) {e.preventDefault(); e.stopPropagation();}, true);
+            document.addEventListener("touchstart", function(e) {e.preventDefault();}, true);
+            document.addEventListener("touchmove", function(e) {e.preventDefault();}, true);
+
+            var ele;
+            var ename = ["overlay", "cells", "container", "outer"];
+            for (var i = 0; i < ename.length; i++) {
+                ele = document.getElementById(ename[i]);
+                if (ele) {
+                    ele.addEventListener("mousemove", that.onMouseMove, true);
+                    ele.addEventListener("touchmove", that.onTouchMove, true);
+                    ele.addEventListener("touchstart", that.onTouchMove, false);
+             }
+            }
+            firstRun = false;
+        }
         cR.init();
-        dbg("Initialized cell renderer");
         setScaling();
         gC.init();
         cA.init();
-        window.addEventListener("resize", setScaling);
-        window.addEventListener("touchmove", function(e) {e.preventDefault();});
-        document.addEventListener("onscroll", function(e) {e.preventDefault(); e.stopPropagation();}, true);
-        document.addEventListener("touchstart", function(e) {e.preventDefault();}, true);
-        document.addEventListener("touchmove", function(e) {e.preventDefault();}, true);
+        cA.testCellState();
+        that.level = 0;
+        that.promptGo("Welcome to CellFence.  Start Game", function() {that.playLevel();});
+    }
 
-        var ele;
-        var ename = ["overlay", "cells", "container", "outer"];
-        for (var i = 0; i < ename.length; i++) {
-            ele = document.getElementById(ename[i]);
-            if (ele) {
-                ele.addEventListener("mousemove", that.onMouseMove, true);
-                ele.addEventListener("touchmove", that.onTouchMove, true);
-                ele.addEventListener("touchstart", that.onTouchMove, false);
+    this.playLevel = function() {
+        dbg ("Starting level " + (1 + that.level));
+        document.getElementById("textLine").innerText = "Level: " + (1 + that.level);
+        var lData = LEVELS[that.level];
+        var gr = new graphicSettings(); gr.defaults();
+        var gm = new gameSettings(); gm.defaults();
+        var i;
+        for (i in lData["graphics"]) {
+            dbg(i + ": " + lData["graphics"][i]);
+            gr[i]=lData["graphics"][i];
+        }
+        for (i in lData["game"]) {
+            dbg(i + ": " + lData["game"][i]);
+            gm[i]=lData["game"][i];
+        }
+        cR.init(); 
+        gC.init(); 
+        cA.init(); 
+        gC.physics(); 
+        frameCount = 0;
+        that.runLevel();
+    }
+
+    this.runLevel = function () {
+        var cmd = LEVELS[that.level].sequence[frameCount];
+        if (cmd) {
+            if (cmd[0] == "PROMPT") {
+                LAYOUT.popup(true, cmd[1], 800);
+            }
+            if (cmd[0] == "SPAWN") {
+                cA.spawnCells(cmd[1]);
+            }
+            if (cmd[0] == "END") {
+                if (LEVELS[that.level+1]) {
+                    that.level++;
+                    that.promptGo("Level Complete", that.playLevel);
+                    return;
+                } else {
+                    that.promptGo("Game Completed!  Congratulations!", that.init);
+                    return;
+                }
             }
         }
-        LAYOUT.choices(true, "Test Me", "Eat Poop", "Don't Eat Poop", null);
-        this.demoLoop();
+        gC.physics();
+        if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
+                {cA.dropBlinker(gC.posX, gC.posY);}
+        cA.alertNear = cA.alertLoss = false;
+        cA.cycle();
+        if (cA.alertNear) {
+            if (cA.alertLoss) {
+                document.getElementById("outer").style.backgroundColor = "#F00";
+            } else {document.getElementById("outer").style.backgroundColor = "#EE0";}
+        } else {document.getElementById("outer").style.backgroundColor="#111";}
+        cR.render(cA.cellState());
+        frameCount++;
+        window.setTimeout(that.runLevel, g.frameDelay);
     }
+
+    var continuation = null;
+
+    this.promptGo = function (prompt, nextcall) {
+        LAYOUT.choices(true, prompt, "OK", "", null);
+        continuation = nextcall;
+        that.promptLoop();
+    }
+
+    this.promptLoop = function() {
+        if (LAYOUT.lastChoice != -1) {continuation();}
+        else {
+            gC.physics();
+            cA.cycle();
+            cR.render(cA.cellState());
+            window.setTimeout(that.promptLoop, g.frameDelay);
+        }
+    }
+
+    
   
     this.onMouseMove = function(e) {
         gC.sendMouseClientPos(e.clientX, e.clientY);
@@ -581,7 +668,6 @@ function CLifer () {
     var fCounter = 0;
 
     this.demoLoop = function() {
-        dbg("Demo loop"); 
         fCounter = 0;
         that.loop2();
     }
