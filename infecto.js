@@ -621,7 +621,7 @@ function CLifer () {
         var cmd = LEVELS[that.level].sequence[frameCount];
         if (cmd) {
             if (cmd[0] == "PROMPT") {
-                LAYOUT.popup(true, cmd[1], 1000);
+                LAYOUT.popup(true, cmd[1], 2000);
             }
             if (cmd[0] == "SPAWN") {
                 cA.spawnCells(cmd[1]);
