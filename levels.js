@@ -42,7 +42,7 @@ LEVELS[1] = {
 }
 
 LEVELS[2] = {
-	"graphics":{"p1Color":0xEF0020, "p2Color":0x00FF10, "bgColor":0x000018},
+	"graphics":{"p1Color":0xEF2000, "p2Color":0x00FF10, "bgColor":0x000010},
 	"game":{"spawnBox":0.20},
 	"sequence": {
 		0: ["PROMPT", "3"],
@@ -71,6 +71,44 @@ LEVELS[2] = {
 		670: ["SPAWN", 129],
 		750: ["SPAWN", 132],
 		830: ["SPAWN", 131],
+		930: ["SPAWN", 137],
+		1030: ["SPAWN", 0],
+		1100: ["END"]
+	}
+}
+
+LEVELS[3] = {
+	"graphics":{"p1Color":0xE02000, "p2Color":0x00FF10, "bgColor":0x000000},
+	"game":{"spawnBox":0.20},
+	"sequence": {
+		0: ["PROMPT", "FOUR!"],
+		5: ["SPAWN", 9],
+		50: ["SPAWN", 9],
+		110: ["SPAWN", 0],
+		120: ["SPAWN", 0],
+		130: ["SPAWN", 0],
+		140: ["SPAWN", 0],
+		150: ["SPAWN", 0],
+		160: ["SPAWN", 0],
+		170: ["SPAWN", 0],
+		180: ["SPAWN", 0],
+		190: ["SPAWN", 0],
+		200: ["SPAWN", 0],
+		210: ["SPAWN", 0],
+		220: ["SPAWN", 0],
+		230: ["SPAWN", 0],
+		240: ["SPAWN", 0],
+		250: ["SPAWN", 0],
+		260: ["SPAWN", 0],
+		300: ["SPAWN", 132],
+		400: ["SPAWN", 3],
+		480: ["SPAWN", 2],
+		540: ["SPAWN", 1],
+		600: ["SPAWN", 0],
+		660: ["SPAWN", 130],
+		720: ["SPAWN", 129],
+		780: ["SPAWN", 132],
+		840: ["SPAWN", 131],
 		930: ["SPAWN", 137],
 		1030: ["SPAWN", 0],
 		1100: ["END"]

@@ -615,6 +615,8 @@ function CLifer () {
         that.runLevel();
     }
 
+    this.dropCycle = 0;
+
     this.runLevel = function () {
         var cmd = LEVELS[that.level].sequence[frameCount];
         if (cmd) {
@@ -636,8 +638,11 @@ function CLifer () {
             }
         }
         gC.physics();
-        if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
-                {cA.dropBlinker(gC.posX, gC.posY);}
+        if (that.dropCycle == 0) {
+            if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
+                    {cA.dropBlinker(gC.posX, gC.posY);}
+        }
+        that.dropCycle++; if (that.dropCycle == g.dropCycles) {that.dropCycle = 0;}
         cA.alertNear = false;
         cA.cycle();
         if (cA.alertLoss) {
@@ -649,11 +654,12 @@ function CLifer () {
         frameCount++;
         if (cA.alertLoss) {
             var lC = cA.lostCoord();  gC.setLostMarker(lC[0], lC[1]);
-            that.promptGo("Enemy cells escaped.  Restart game", that.init);
+            that.promptRestart();
         } else {
             window.setTimeout(that.runLevel, g.frameDelay);
         }
     }
+
 
     var continuation = null;
 
@@ -671,6 +677,24 @@ function CLifer () {
             cR.render(cA.cellState());
             window.setTimeout(that.promptLoop, g.frameDelay);
         }
+    }
+
+    this.promptRestart = function() {
+        LAYOUT.choices(true, "Enemy cells escaped.  Game over.", "Retry Level", "Restart");
+        window.setTimeout(that.restartLoop, g.frameDelay);
+    }
+
+    this.restartLoop = function() {
+        if (LAYOUT.lastChoice == 1) {
+            that.init(); return;
+        }
+        if (LAYOUT.lastChoice == 0) {
+            that.playLevel(); return;
+        }
+        gC.physics();
+        cA.cycle();
+        cR.render(cA.cellState());
+        window.setTimeout(that.restartLoop, g.frameDelay);
     }
 
     
