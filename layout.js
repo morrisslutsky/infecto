@@ -102,11 +102,11 @@ function Layout() {
 		document.getElementById(butn).style.top = Math.round(y);
 		document.getElementById(butn).style.left = Math.round(x);
 		document.getElementById(butn).style.visibility = "visible";
-		//document.getElementById(butn).disabled = "true";
 	}
 
 	this.enableButton = function(name, val) {
 		var e = document.getElementById("btn_"+name);
+		if (!e) return;
 		if (val) {
 			e.disabled = false;
 			e.style.opacity = 1.0;
@@ -114,6 +114,13 @@ function Layout() {
 			e.disabled = true;
 			e.style.opacity = 0.5;
 		}
+	}
+
+	this.isButtonEnabled = function(name) {
+		var e = document.getElementById("btn_"+name);
+		if (!e) return false;
+		return !(e.disabled);
+
 	}
 
 	this.doLayout = function () {
@@ -181,7 +188,7 @@ function Layout() {
 		/* lay out buttons and text area, depending upon portrait/landscape orientation */
 
 		var x, xx, y, yy;
-		var bnames = ["bomb", "trash", "clock", "shield", "", "menu"];
+		var bnames = ["clock", "bomb", "shield", "trash", "", "menu"];
 		/* the big choice */
 		if (vp[0] > vp[1]) {
 			/* landscape layout */
@@ -290,6 +297,8 @@ function Layout() {
 		document.getElementById("popup-cancel").addEventListener("touchstart", callCancel, true);
 	}
 
+	var installButtonHandlers = true;
+
 	this.init = function() {
 		dbg ("initializing layout");
 		/* writing test pattern to cells */
@@ -301,7 +310,40 @@ function Layout() {
 		that.enableButton("trash", false);
 		that.enableButton("shield", false);
 		that.enableButton("menu", true);
+
+		/* button event handler setup:  do this once and only once */
+		function makeHandler(name) {return function() {that.buttonHandler(name);};}
+
+		if (installButtonHandlers) {
+			var bnms = ["clock", "bomb", "shield", "trash", "menu"];
+			for (var ii = 0; ii < bnms.length; ii++) {
+				var bn = "btn_" + bnms[ii];
+				document.getElementById(bn).onclick = makeHandler(bnms[ii]);
+				document.getElementById(bn).addEventListener("touchstart", 
+					makeHandler(bnms[ii]));
+				}
+			installButtonHandlers = false;
+		}
 	}
+
+	var buttonsPushed = [];
+
+	this.getButtons = function() {
+		var ret = buttonsPushed;
+		buttonsPushed = [];
+		return ret;
+	}
+
+	this.buttonHandler = function(name) {
+		if (!that.isButtonEnabled(name)) return;
+		if (buttonsPushed.lastIndexOf(name) == -1) {
+			buttonsPushed.push(name);
+		}
+		dbg ("button hit: " + name);
+	}
+
+
+	
 
 }
 

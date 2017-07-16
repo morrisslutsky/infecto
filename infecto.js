@@ -161,6 +161,9 @@ function cellRenderer() {
 
     var szX, szY;
 
+    var flash = false;
+    var oldBG = [0,0,0,0];
+
     this.getCanvas = function() {return Canvas;}
 
     this.rgba2List = function(rgba) {
@@ -178,6 +181,7 @@ function cellRenderer() {
         }
         ctx.putImageData(image,0,0);
         imageData = 0; image = 0;
+        if (flash) {that.unflash();}
       
     }
 
@@ -228,8 +232,32 @@ function cellRenderer() {
         for (i=3;i<127;i++) {
             cm[i] = [255,255,255,255]; /* invalid cell states */
         }
+
+        /* white 'flash' when cells are nuked */
+        cm[-71] = [255,255,255,255]; cm[-72] = [255,255,255,255];
+        cm[-69] = [255,255,255,255]; cm[-70] = [255,255,255,255];
+        cm[-67] = [255,255,255,255]; cm[-68] = [255,255,255,255];
+        for (i=0; i<4;i++) {
+            cm[-65][i] = (cm[-67][i] + cm[-63][i])/2;
+            cm[-66][i] = (cm[-68][i] + cm[-64][i])/2;
+        }
         colorMap = cm;
         dbg("Colormap created");
+    }
+
+    this.flash = function() {
+        flash = true;
+        oldBG = colorMap[0];
+        var i; var nB = [0,0,0,0];
+        for (i=0;i<4;i++){
+            nB[i] = Math.floor((3 * 255 + oldBG[i])/4);
+        }
+        colorMap[0] = nB;
+    }
+
+    this.unflash = function() {
+        flash = false;
+        colorMap[0] = oldBG;
     }
 
     this.init = function() {
@@ -398,6 +426,25 @@ function cellAutomaton() {
             }
         }
         var tp = cb[0]; cb[0] = cb[1]; cb[1] = tp;
+    }
+    /* if not p2kill, only removes p1 cells (enemy) */
+    this.nuke = function (p2kill) {
+        var x, y, c, i=0;
+        for (y=0; y < szY; y++) {
+            for (x=0; x<szX; x++) {
+                c = cb[0].cellState[i]; i++;
+                switch (c) {
+                    case 1:
+                        that.alterCell(x, y, -71, 0);
+                        break;
+                    case 2:
+                        if (p2kill) {
+                            that.alterCell(x, y, -72, 0);
+                            break;
+                        }
+                }
+            }
+        }
     }
 
     this.spawnCells = function(type) {
@@ -587,8 +634,16 @@ function CLifer () {
         cA.init();
         cA.testCellState();
         that.level = 0;
+        LAYOUT.enableButton("bomb", false);
+        LAYOUT.enableButton("clock", false);
+        LAYOUT.enableButton("trash", false);
+        LAYOUT.enableButton("shield", false);
+        LAYOUT.getButtons();
         that.promptGo("Welcome to CellFence.  Start Game", that.playLevel);
     }
+
+    var pwrClock = false; var pwrBomb = false; var pwrTrash = false; var pwrShield = false;
+    var clockFrames = 0;  var shieldFrames = 0;
 
     this.playLevel = function() {
         document.getElementById("outer").style.backgroundColor="#111";
@@ -612,12 +667,33 @@ function CLifer () {
         gC.physics(); 
         frameCount = 0;
         cA.alertLoss = false;
+        pwrClock = pwrBomb = pwrTrash = pwrShield = false;
+        clockFrames = shieldFrames = 0;
+        LAYOUT.getButtons(); /* clear button push buffer */
         that.runLevel();
     }
 
     this.dropCycle = 0;
 
+
     this.runLevel = function () {
+        /* check for powerup activation */
+        var buttons = LAYOUT.getButtons();
+        if (buttons.lastIndexOf("clock") != -1) {
+            pwrClock = true; clockFrames = Math.round(3000/(new gameSettings().frameDelay)); 
+            LAYOUT.popup(true, "3-Second Freeze", 2000);
+            LAYOUT.enableButton("clock", false);
+        }
+        if (buttons.lastIndexOf("bomb") != -1) {
+            pwrBomb = true;
+            LAYOUT.popup(true, "Bomb Clears Playfield", 2000);
+            cA.nuke(true);
+            LAYOUT.enableButton("bomb", false);
+        }
+        if (buttons.lastIndexOf("trash") != -1) {pwrTrash = true;}
+        if (buttons.lastIndexOf("shield") != -1) {pwrShield = true;}
+
+        /* read level script */
         var cmd = LEVELS[that.level].sequence[frameCount];
         if (cmd) {
             if (cmd[0] == "PROMPT") {
@@ -625,6 +701,12 @@ function CLifer () {
             }
             if (cmd[0] == "SPAWN") {
                 cA.spawnCells(cmd[1]);
+            }
+            if (cmd[0] == "POWERUP") {
+                if (!LAYOUT.isButtonEnabled(cmd[1])) {
+                    LAYOUT.enableButton(cmd[1], true);
+                    LAYOUT.popup(true, cmd[1].toUpperCase() + " POWERUP ENABLED", 2000);
+                }   
             }
             if (cmd[0] == "END") {
                 if (LEVELS[that.level+1]) {
@@ -637,21 +719,32 @@ function CLifer () {
                 }
             }
         }
+        /* manage input and drop cells */
         gC.physics();
         if (that.dropCycle == 0) {
             if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
                     {cA.dropBlinker(gC.posX, gC.posY);}
         }
         that.dropCycle++; if (that.dropCycle == g.dropCycles) {that.dropCycle = 0;}
+        /* run automaton and check loss conditions */
         cA.alertNear = false;
-        cA.cycle();
+        if (!pwrClock) {cA.cycle();}
         if (cA.alertLoss) {
                 document.getElementById("outer").style.backgroundColor = "#F00";
         } else if (cA.alertNear) {
              document.getElementById("outer").style.backgroundColor = "#EE0";
         } else {document.getElementById("outer").style.backgroundColor="#111";}
+
+        /* render playfield */
+        if (pwrBomb) {
+            cR.flash();
+            pwrBomb = false;
+        }
         cR.render(cA.cellState());
-        frameCount++;
+        
+        if (!pwrClock) {frameCount++;}
+        clockFrames--; if (clockFrames == 0) {pwrClock = false;}
+        /* continue or break out of game loop */
         if (cA.alertLoss) {
             var lC = cA.lostCoord();  gC.setLostMarker(lC[0], lC[1]);
             that.promptRestart();
