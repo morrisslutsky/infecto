@@ -762,7 +762,7 @@ function CLifer () {
             if (cmd[0] == "END") {
                 if (LEVELS[that.level+1]) {
                     that.level++;
-                    that.promptGo("Level Complete", that.playLevel);
+                    that.promptNextLevel();
                     return;
                 } else {
                     that.promptGo("Game Completed!  Congratulations!", that.init);
@@ -812,6 +812,18 @@ function CLifer () {
     this.promptGo = function (prompt, nextcall) {
         LAYOUT.choices(true, prompt, "OK", "");
         continuation = nextcall;
+        that.promptLoop();
+    }
+
+    this.promptNextLevel = function() {
+        var prompt = "Level Completed! \n";
+        var pup = LAYOUT.pickRandomPowerup();
+        if (pup) {
+            LAYOUT.enableButton(pup, true);
+            prompt = prompt + pup.toUpperCase() + " POWERUP ENABLED";
+        }
+        continuation = that.playLevel;
+        LAYOUT.choices(true, prompt, "OK", "");
         that.promptLoop();
     }
 

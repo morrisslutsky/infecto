@@ -334,6 +334,14 @@ function Layout() {
 		return ret;
 	}
 
+	/* return a random powerup that isn't already enabled, or null */
+	this.pickRandomPowerup = function() {
+		var bnms = ["clock", "bomb", "shield", "trash"];
+		var bl = bnms.filter(function(x) {return(!that.isButtonEnabled(x));});
+		if (bl.length == 0) return null;
+		return bl[Math.floor(Math.random()*bl.length)];
+	}
+
 	this.buttonHandler = function(name) {
 		if (!that.isButtonEnabled(name)) return;
 		if (buttonsPushed.lastIndexOf(name) == -1) {

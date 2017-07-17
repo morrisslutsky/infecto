@@ -12,15 +12,11 @@ LEVELS[0] = {
 		150: ["PROMPT", "Block the red cells from growing to the edge of the board."],
 		200: ["SPAWN", 0],
 		300: ["SPAWN", 0],
-		350: ["POWERUP", "clock"],
 		400: ["SPAWN", 0],
 		500: ["SPAWN", 0],
-		550: ["POWERUP", "bomb"],
 		600: ["SPAWN", 0],
 		700: ["SPAWN", 0],
-		750: ["POWERUP", "trash"],
 		800: ["SPAWN", 0],
-		850: ["POWERUP", "shield"],
 		900: ["SPAWN", 0],
 		1000: ["PROMPT", "Very good!"],
 		1050: ["END"]
@@ -52,7 +48,7 @@ LEVELS[2] = {
 	"graphics":{"p1Color":0xEF2000, "p2Color":0x00FF10, "bgColor":0x000010},
 	"game":{"spawnBox":0.20},
 	"sequence": {
-		0: ["PROMPT", "3"],
+		0: ["PROMPT", "Level 3"],
 		10: ["SPAWN", 0],
 		20: ["SPAWN", 0],
 		30: ["SPAWN", 0],
@@ -90,7 +86,7 @@ LEVELS[3] = {
 	"sequence": {
 		0: ["PROMPT", "FOUR!"],
 		15: ["SPAWN", 9],
-		60: ["SPAWN", 9],
+		85: ["SPAWN", 9],
 		110: ["SPAWN", 0],
 		120: ["SPAWN", 0],
 		130: ["SPAWN", 0],
