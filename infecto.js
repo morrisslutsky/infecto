@@ -545,10 +545,11 @@ function cellAutomaton() {
                     }
                 }
                 break;
-            case 10: /* spaceship flotillas */
-            case 11:
-            case 12:
-            case 13:
+                        /* spaceship flotillas */
+            case 10: /* down */
+            case 11: /* up */
+            case 12: /* right */
+            case 13: /* left */
                 for (x = szX/2; x < x1-3; x += 7) {
                     for (y = szY/2; y < y1-3; y+= 7) {
                         that.dropSpaceship(x,y,type-10);
@@ -557,6 +558,9 @@ function cellAutomaton() {
                         that.dropSpaceship(x, szY-y, type-10);
                     }
                 }
+                break;
+            case 14: /* drop MAX pattern */
+                that.dropMax(szX/2, szY/2);
                 break;
         }
     }
@@ -600,6 +604,44 @@ function cellAutomaton() {
         }
     }
 
+    this.dropMax = function(x, y) {
+        var i, j;
+        var mxp = new Array();
+        mxp[0]=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0];
+        mxp[1]=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0];
+        mxp[2]=[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0];
+        mxp[3]=[0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,1,0,0,1,0,1,1,0,0,0,0];
+        mxp[4]=[0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,1,0,0,0,0,0];
+        mxp[5]=[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,1,0,0];
+        mxp[6]=[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,1,1,0,0];
+        mxp[7]=[1,1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0,0];
+        mxp[8]=[1,0,0,0,1,1,0,1,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0];
+        mxp[9]=[1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        mxp[10]=[0,1,0,0,1,1,0,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0];
+        mxp[11]=[0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,1,1,1];
+        mxp[12]=[0,1,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1];
+        mxp[13]=[1,0,0,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,0,0,1];
+        mxp[14]=[1,0,0,0,1,1,0,1,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,0,0,1,0];
+        mxp[15]=[1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0];
+        mxp[16]=[0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,1,0,0,1,0,1,1,0,0,1,0];
+        mxp[17]=[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1];
+        mxp[18]=[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,0,1,0,1,1,0,0,0,1];
+        mxp[19]=[0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0,1,1,1,1];
+        mxp[20]=[0,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0];
+        mxp[21]=[0,0,1,1,0,1,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0];
+        mxp[22]=[0,0,0,0,0,1,0,1,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0];
+        mxp[23]=[0,0,0,0,1,1,0,1,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+        mxp[24]=[0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0];
+        mxp[25]=[0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        mxp[26]=[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+        for (i = 0; i < 27; i++) {
+            for (j = 0; j < 27; j++) {
+                that.alterCell (x + i - 12, y + j - 12, mxp[i][j], 0)
+            }
+        }
+    }
+
     this.testCellState = function() {
         var x, y;
         var b; 
@@ -632,6 +674,8 @@ function CLifer () {
 
     var gC = new gameCursor();
     this.getGC = function() {return gC;}
+
+    this.WARP = -1;
 
     function setScaling() {
         var clientX, clientY;
@@ -685,6 +729,7 @@ function CLifer () {
     var clockFrames = 0;  var shieldFrames = 0;
 
     this.playLevel = function() {
+        if (that.WARP >= 0) {that.level = that.WARP; that.WARP = -1;}
         document.getElementById("outer").style.backgroundColor="#111";
         dbg ("Starting level " + (1 + that.level));
         document.getElementById("textLine").innerText = "Level: " + (1 + that.level);
@@ -759,10 +804,11 @@ function CLifer () {
                     LAYOUT.popup(true, cmd[1].toUpperCase() + " POWERUP ENABLED", 2000);
                 }   
             }
-            if (cmd[0] == "END") {
+            if ((cmd[0] == "END") || (cmd[0] == "ENDNOP" ) ){
                 if (LEVELS[that.level+1]) {
                     that.level++;
-                    that.promptNextLevel();
+                    if (cmd[0] == "END") {that.promptNextLevel();}
+                    else {that.promptGo("Level Completed!", that.playLevel);}
                     return;
                 } else {
                     that.promptGo("Game Completed!  Congratulations!", that.init);
