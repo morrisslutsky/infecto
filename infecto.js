@@ -39,6 +39,7 @@ function gameSettings() {
         that.spawnBox = 0.25;
         that.dropCycles = 1;
         that.frameDelay = 40;
+        that.shieldWidth = 5;
     }
     that.defaults();
     gameSettings.instance = this;
@@ -447,6 +448,44 @@ function cellAutomaton() {
         }
     }
 
+    this.shield = function() {
+        var x, y, c, i=0;
+        for (y=0; y < szY; y++) {
+            for (x=0; x<szX; x++) {
+                if ( (x < gs.shieldWidth) || (x > szX - gs.shieldWidth)  
+                        || (y < gs.shieldWidth) || (y > szY - gs.shieldWidth)) { 
+                    c = cb[0].cellState[i]; 
+                    switch (c) {
+                        case 1:
+                            that.alterCell(x, y, -71, 0);
+                            break;
+                        case 2:
+                            that.alterCell(x, y, -72, 0);
+                            break;
+                        case 0:
+                            that.alterCell(x, y, ((x+y)%2) - 65, 0);
+                            break;
+                    }
+                }
+                i++;
+            }
+        }
+    }
+
+    this.deShield = function() {
+        var x, y, c, i=0;
+        for (y=0; y < szY; y++) {
+            for (x=0; x<szX; x++) {
+                if ( (x < gs.shieldWidth) || (x > szX - gs.shieldWidth)  
+                        || (y < gs.shieldWidth) || (y > szY - gs.shieldWidth)) { 
+                    c = cb[0].cellState[i]; 
+                    if (c < 0) {cb[0].cellState[i] = 0;}
+                }
+                i++;
+            }
+        }
+    }
+
     this.spawnCells = function(type) {
         var x, y, b;
         var x0 = Math.round((0.5 - gs.spawnBox) * szX);
@@ -690,8 +729,20 @@ function CLifer () {
             cA.nuke(true);
             LAYOUT.enableButton("bomb", false);
         }
-        if (buttons.lastIndexOf("trash") != -1) {pwrTrash = true;}
-        if (buttons.lastIndexOf("shield") != -1) {pwrShield = true;}
+
+        if (buttons.lastIndexOf("trash") != -1) {
+            pwrBomb = true;
+            LAYOUT.popup(true, "Trash Clears Enemy", 2000);
+            cA.nuke(false);
+            LAYOUT.enableButton("trash", false);
+        }
+
+        if (buttons.lastIndexOf("shield") != -1) {
+            pwrShield = true;
+            shieldFrames = Math.round(5000/(new gameSettings().frameDelay));
+            LAYOUT.popup(true, "5-Second Shield", 2000);
+            LAYOUT.enableButton("shield", false);
+        }
 
         /* read level script */
         var cmd = LEVELS[that.level].sequence[frameCount];
@@ -728,6 +779,7 @@ function CLifer () {
         that.dropCycle++; if (that.dropCycle == g.dropCycles) {that.dropCycle = 0;}
         /* run automaton and check loss conditions */
         cA.alertNear = false;
+        if (pwrShield) {cA.shield();}
         if (!pwrClock) {cA.cycle();}
         if (cA.alertLoss) {
                 document.getElementById("outer").style.backgroundColor = "#F00";
@@ -744,6 +796,7 @@ function CLifer () {
         
         if (!pwrClock) {frameCount++;}
         clockFrames--; if (clockFrames == 0) {pwrClock = false;}
+        shieldFrames--; if (shieldFrames == 0) {pwrShield = false; cA.deShield();}
         /* continue or break out of game loop */
         if (cA.alertLoss) {
             var lC = cA.lostCoord();  gC.setLostMarker(lC[0], lC[1]);
