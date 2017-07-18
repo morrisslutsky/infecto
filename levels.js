@@ -412,6 +412,77 @@ LEVELS[12] = {
 		840: ["SPAWN", 131],
 		930: ["SPAWN", 137],
 		1030: ["SPAWN", 0],
-		1100: ["ENDNOP"]
+		1100: ["END"]
+	}
+}
+
+LEVELS[13] = {
+	"graphics":{"p1Color":0xE08000, "p2Color":0x00E080, "bgColor":0x100000},
+	"game":{"spawnBox":0.25, "frameDelay": 35},
+	"sequence": {
+		0: ["PROMPT", "Level 14!"],
+		10: ["SPAWN", 9],
+		120: ["SPAWN", 5],
+		125: ["SPAWN", 6],
+		150: ["SPAWN", 7+128],
+		160: ["SPAWN", 8],
+		190: ["SPAWN", 0],
+		192: ["SPAWN", 0],
+		194: ["SPAWN", 0],
+		196: ["SPAWN", 0],
+		200: ["SPAWN", 0],
+		210: ["SPAWN", 0],
+		220: ["SPAWN", 0],
+		230: ["SPAWN", 0],
+		240: ["SPAWN", 0],
+		250: ["SPAWN", 0],
+		260: ["SPAWN", 0],
+		300: ["SPAWN", 132],
+		400: ["SPAWN", 5],
+		480: ["SPAWN", 6],
+		540: ["SPAWN", 7],
+		600: ["SPAWN", 8],
+		660: ["SPAWN", 138],
+		720: ["SPAWN", 129],
+		780: ["SPAWN", 132],
+		840: ["SPAWN", 131],
+		930: ["SPAWN", 137],
+		1030: ["SPAWN", 0],
+		1100: ["END"]
+	}
+}
+
+LEVELS[14] = {
+	"graphics":{"p1Color":0xD0B000, "p2Color":0x00E0A0, "bgColor":0x200000},
+	"game":{"spawnBox":0.25, "frameDelay": 35},
+	"sequence": {
+		0: ["PROMPT", "15!  Look out for what's ahead!"],
+		50: ["SPAWN", 15],
+		170: ["SPAWN", 5],
+		175: ["SPAWN", 6],
+		200: ["SPAWN", 7+128],
+		210: ["SPAWN", 8],
+		240: ["SPAWN", 0],
+		242: ["SPAWN", 0],
+		244: ["SPAWN", 0],
+		246: ["SPAWN", 0],
+		250: ["SPAWN", 0],
+		260: ["SPAWN", 0],
+		270: ["SPAWN", 0],
+		280: ["SPAWN", 0],
+		290: ["SPAWN", 0],
+		300: ["SPAWN", 0],
+		310: ["SPAWN", 0],
+		330: ["PROMPT", "And again!"],
+		380: ["SPAWN", 15+128],
+		440: ["SPAWN", 6],
+		500: ["SPAWN", 7],
+		560: ["SPAWN", 8],
+		620: ["SPAWN", 138],
+		680: ["SPAWN", 129],
+		720: ["SPAWN", 132],
+		780: ["SPAWN", 131],
+		830: ["SPAWN", 137],
+		930: ["END"]
 	}
 }

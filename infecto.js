@@ -506,7 +506,7 @@ function cellAutomaton() {
         switch (type) {
             case 0: /* random fill */
                  for (x=x0; x <= x1; x++) {
-                    for (y = x0; y <= y1; y++) {
+                    for (y = y0; y <= y1; y++) {
                         b = 0;
                         if (Math.random() < 0.3) {b = 1;}
                         if (b) {that.alterCell (x, y, b, 0);}
@@ -562,6 +562,16 @@ function cellAutomaton() {
             case 14: /* drop MAX pattern */
                 that.dropMax(szX/2, szY/2);
                 break;
+            case 15: /* drop box pattern */
+                for (x=x0; x <= x1; x++) {
+                    that.alterCell(x, y0, 1, 0);
+                    that.alterCell(x, y1, 1, 0);
+                }
+                for (y = y0; y <= y1; y++) {
+                    that.alterCell(x0, y, 1, 0);
+                    that.alterCell(x1, y, 1, 0);
+                }
+                break;
         }
     }
 
@@ -603,6 +613,7 @@ function cellAutomaton() {
             }
         }
     }
+
 
     this.dropMax = function(x, y) {
         var i, j;
