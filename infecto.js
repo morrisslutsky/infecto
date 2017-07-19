@@ -708,7 +708,7 @@ function CLifer () {
             document.addEventListener("onscroll", function(e) {e.preventDefault(); e.stopPropagation();}, true);
             document.addEventListener("touchstart", function(e) {e.preventDefault();}, true);
             document.addEventListener("touchmove", function(e) {e.preventDefault();}, true);
-
+            document.getElementById("thebody").onkeydown = LAYOUT.keyHandler;
             var ele;
             var ename = ["overlay", "cells", "container", "outer"];
             for (var i = 0; i < ename.length; i++) {

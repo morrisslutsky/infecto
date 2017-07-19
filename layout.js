@@ -11,7 +11,9 @@ function Layout() {
 	this.padding = 16;
 	this.border = 4;
 
-	this.buttonSize = 25; /* minimum, scales up with resolution though */
+	this.buttonSize = 35; /* minimum, scales up with resolution though */
+	this.fontSize = 14;
+	this.okFontSize = 24;
 	this.buttonBorder = 3;
 
 	this.testPattern = function() {
@@ -170,7 +172,7 @@ function Layout() {
 		e.style.borderColor="#444444";
 		e.style.backgroundColor="#777777";
 		e.style.borderRadius=bor*2+"px";
-		e.style.fontSize = Math.round(bS * 16 / 25);
+		e.style.fontSize = Math.round(bS * that.fontSize / 25);
 		e.style.color = "#CC0000";
 		e.style.textAlign = "center";
 		that.disableSelection(e);
@@ -181,7 +183,10 @@ function Layout() {
 		e.style.fontSize = Math.round(bS);
 		e = document.getElementById("popup-content");
 		e.style.borderWidth = bor + "px";
-
+		e = document.getElementById("popup-ok");
+		e.style.fontSize = Math.round(bS * that.okFontSize / 35);
+		e = document.getElementById("popup-cancel");
+		e.style.fontSize = Math.round(bS * that.okFontSize / 35);
 		that.disableSelection(document.getElementById("popup-ok"));
 		that.disableSelection(document.getElementById("popup-cancel"));
 
@@ -272,6 +277,10 @@ function Layout() {
 	
 	this.choiceBox = false;
 
+	this.closeMe = function() {that.choices(false, "", "", "", null);}
+	this.callOK = function() {that.closeMe(); that.lastChoice = 0;}
+	this.callCancel = function() {that.closeMe(); that.lastChoice = 1;}
+
 	this.choices = function(bShow, sMessage, okText, cancelText) {
 		var e = document.getElementById("popup");
 		if (!bShow) {that.choiceBox = false; e.style.display = 'none'; return;}
@@ -288,13 +297,10 @@ function Layout() {
 		}
 		document.getElementById("popup-okcancel").style.display = 'block';
 		e.style.display='block';
-		function closeMe() {that.choices(false, "", "", "", null);}
-		function callOK() {closeMe(); that.lastChoice=0;}
-		function callCancel() {closeMe(); that.lastChoice=1;}
-		document.getElementById("popup-ok").onclick = callOK;
-		document.getElementById("popup-ok").addEventListener("touchstart", callOK, true);
-		document.getElementById("popup-cancel").onclick = callCancel;
-		document.getElementById("popup-cancel").addEventListener("touchstart", callCancel, true);
+		document.getElementById("popup-ok").onclick = that.callOK;
+		document.getElementById("popup-ok").addEventListener("touchstart", that.callOK, true);
+		document.getElementById("popup-cancel").onclick = that.callCancel;
+		document.getElementById("popup-cancel").addEventListener("touchstart", that.callCancel, true);
 	}
 
 	var installButtonHandlers = true;
@@ -350,9 +356,34 @@ function Layout() {
 		dbg ("button hit: " + name);
 	}
 
-
+	this.noKey = true;
+	this.keyHandler = function(e) {
+		if (that.noKey) {
+			that.noKey = false;
+			var bnms = ["clock", "bomb", "shield", "trash"];
+			var inm;
+			for (var i = 0; i < bnms.length; i++) {
+				inm = "img/"+bnms[i]+"hk.png";
+				document.getElementById("img_"+bnms[i]).src = inm;
+			}
+		}
+		var cc = e.which || e.keyCode;
+		switch (cc) {
+			case 67:  that.buttonHandler("clock"); break;
+			case 88:  that.buttonHandler("bomb"); break;
+			case 90:  that.buttonHandler("trash"); break;
+			case 83:  that.buttonHandler("shield"); break;
+		}
+		/* shortcuts for OK and Cancel dialog box */
+		if (that.choiceBox) {
+			if ((cc == 32) || (cc == 13) ) {that.callOK();}
+			if (cc == 27) {that.callCancel();}
+		}
+		/* don't allow space, page up, page down, home, end, arrow keys */
+		/* but don't trash, say, F12 debugging.  I might need that. */
+		if ((cc >= 32) && (cc <= 40) ) {e.preventDefault();}
+	}
 	
-
 }
 
 var LAYOUT = new Layout();
