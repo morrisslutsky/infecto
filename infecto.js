@@ -63,8 +63,13 @@ function gameCursor() {
     var lostX; var lostY;
     var lostMarker = false;
 
+
     this.setLostMarker = function (x,y) {lostMarker = true; lostX = x; lostY = y;}
     this.clearLostMarker = function() {lostMarker = false;}
+
+    var flashSpawnBox = false;
+
+    this.flashSpawnBox = function() {flashSpawnBox = true;}
 
     this.moveCursor = function (nX, nY) {
         tX = nX; tY = nY;
@@ -111,7 +116,8 @@ function gameCursor() {
             ctx.beginPath();
             ctx.rect(parseInt(cX*(0.5-spawnBox)), parseInt(cY*(0.5-spawnBox)),
                     parseInt(cX*spawnBox*2), parseInt(cY*spawnBox*2));
-            ctx.strokeStyle = "#" + g.boxColor.toString(16);
+            if (flashSpawnBox) {ctx.strokeStyle="#FFFFFF"; flashSpawnBox = false;} 
+                else {ctx.strokeStyle = "#" + g.boxColor.toString(16);}
             ctx.lineWidth = g.boxPx * 1.0 * cX / 384.0;
             ctx.stroke();
         }
@@ -808,6 +814,7 @@ function CLifer () {
             }
             if (cmd[0] == "SPAWN") {
                 cA.spawnCells(cmd[1]);
+                gC.flashSpawnBox();
             }
             if (cmd[0] == "POWERUP") {
                 if (!LAYOUT.isButtonEnabled(cmd[1])) {
