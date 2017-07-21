@@ -771,6 +771,7 @@ function CLifer () {
         pwrClock = pwrBomb = pwrTrash = pwrShield = false;
         clockFrames = shieldFrames = 0;
         LAYOUT.getButtons(); /* clear button push buffer */
+        AUDIO.play("start"); /* notify user */
         that.runLevel();
     }
 
@@ -784,12 +785,14 @@ function CLifer () {
             pwrClock = true; clockFrames = Math.round(3000/(new gameSettings().frameDelay)); 
             LAYOUT.popup(true, "3-Second Freeze", 2000);
             LAYOUT.enableButton("clock", false);
+            AUDIO.play("clock");
         }
         if (buttons.lastIndexOf("bomb") != -1) {
             pwrBomb = true;
             LAYOUT.popup(true, "Bomb Clears Playfield", 2000);
             cA.nuke(true);
             LAYOUT.enableButton("bomb", false);
+            AUDIO.play("bomb");
         }
 
         if (buttons.lastIndexOf("trash") != -1) {
@@ -797,6 +800,7 @@ function CLifer () {
             LAYOUT.popup(true, "Trash Clears Enemy", 2000);
             cA.nuke(false);
             LAYOUT.enableButton("trash", false);
+            AUDIO.play("trash");
         }
 
         if (buttons.lastIndexOf("shield") != -1) {
@@ -804,6 +808,7 @@ function CLifer () {
             shieldFrames = Math.round(5000/(new gameSettings().frameDelay));
             LAYOUT.popup(true, "5-Second Shield", 2000);
             LAYOUT.enableButton("shield", false);
+            AUDIO.play("shield");
         }
 
         /* read level script */
@@ -815,6 +820,7 @@ function CLifer () {
             if (cmd[0] == "SPAWN") {
                 cA.spawnCells(cmd[1]);
                 gC.flashSpawnBox();
+                AUDIO.play("spawn");
             }
             if (cmd[0] == "POWERUP") {
                 if (!LAYOUT.isButtonEnabled(cmd[1])) {
@@ -823,8 +829,9 @@ function CLifer () {
                 }   
             }
             if ((cmd[0] == "END") || (cmd[0] == "ENDNOP" ) ){
+                AUDIO.play("win");
                 if (LEVELS[that.level+1]) {
-                    that.level++;
+                    that.level++; 
                     if (cmd[0] == "END") {that.promptNextLevel();}
                     else {that.promptGo("Level Completed!", that.playLevel);}
                     return;
@@ -849,6 +856,7 @@ function CLifer () {
                 document.getElementById("outer").style.backgroundColor = "#F00";
         } else if (cA.alertNear) {
              document.getElementById("outer").style.backgroundColor = "#EE0";
+             AUDIO.play("warn");
         } else {document.getElementById("outer").style.backgroundColor="#111";}
 
         /* render playfield */
@@ -863,6 +871,7 @@ function CLifer () {
         shieldFrames--; if (shieldFrames == 0) {pwrShield = false; cA.deShield();}
         /* continue or break out of game loop */
         if (cA.alertLoss) {
+            AUDIO.play("loss");
             var lC = cA.lostCoord();  gC.setLostMarker(lC[0], lC[1]);
             that.promptRestart();
         } else {
