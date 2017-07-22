@@ -828,6 +828,9 @@ function CLifer () {
                     LAYOUT.popup(true, cmd[1].toUpperCase() + " POWERUP ENABLED", 2000);
                 }   
             }
+            if (cmd[0] == "BOX") {
+                g.spawnBox = cmd[1];
+            }
             if ((cmd[0] == "END") || (cmd[0] == "ENDNOP" ) ){
                 AUDIO.play("win");
                 if (LEVELS[that.level+1]) {
