@@ -661,9 +661,63 @@ LEVELS[19] = {
 
 LEVELS[20] = {
 	"graphics":{"p1Color":0xFFA0A0, "p2Color":0xB0EFFF, "bgColor":0x00040A},
+	"game":{"spawnBox":0.27, "frameDelay":35},
+	"sequence": {
+		0: ["PROMPT", "Beware the Box!"],
+		10: ["SPAWN", 0],
+		20: ["SPAWN", 0],
+		30: ["BOX", 0.32],
+		40: ["SPAWN", 0],
+		45: ["BOX", 0.27],
+		50: ["SPAWN", 0],
+		60: ["SPAWN", 0],
+		70: ["BOX", 0.33],
+		74: ["SPAWN", 128+16],
+		78: ["BOX", 0.27],
+		80: ["SPAWN", 0],
+		90: ["SPAWN", 0],
+		100: ["BOX", 0.33],
+		104: ["SPAWN", 128+16],
+		108: ["BOX", 0.27],
+		110: ["SPAWN", 128+4],
+		200: ["BOX", 0.33],
+		204: ["SPAWN", 128+16],
+		208: ["BOX", 0.27],
+		210: ["SPAWN", 3],
+		300: ["BOX", 0.33],
+		304: ["SPAWN", 128+16],
+		308: ["BOX", 0.27],
+		310: ["SPAWN", 2],
+		400: ["BOX", 0.33],
+		404: ["SPAWN", 128+16],
+		408: ["BOX", 0.27],
+		410: ["SPAWN", 1],
+		510: ["SPAWN", 0],
+		520: ["BOX", 0.40],
+		525: ["SPAWN", 128+16],
+		530: ["BOX", 0.27],
+		590: ["SPAWN", 128+2],
+		670: ["SPAWN", 128+1],
+		700: ["BOX", 0.33],
+		704: ["SPAWN", 128+16],
+		708: ["BOX", 0.27],
+		750: ["SPAWN", 128+4],
+		830: ["SPAWN", 128+3],
+		900: ["BOX", 0.33],
+		904: ["SPAWN", 0],
+		908: ["BOX", 0.27],
+		930: ["SPAWN", 128+9],
+		1030: ["SPAWN", 0],
+		1100: ["END"]
+	}
+}
+
+
+LEVELS[21] = {
+	"graphics":{"p1Color":0xF0C000, "p2Color":0xB0FFE0, "bgColor":0x000000},
 	"game":{"spawnBox":0.27, "frameDelay": 35},
 	"sequence": {
-		0: ["PROMPT", "Beware the box!"],
+		0: ["PROMPT", "Level 22"],
 		10: ["POWERUP", "clock"],
 		15: ["SPAWN", 12],
 		30: ["SPAWN", 13],
@@ -701,12 +755,13 @@ LEVELS[20] = {
 	}
 }
 
-LEVELS[21] = {
-	"graphics":{"p1Color":0xF0C000, "p2Color":0xB0FFE0, "bgColor":0x000000},
+LEVELS[22] = {
+	"graphics":{"p1Color":0xFF8008, "p2Color":0x60FF1A, "bgColor":0x080018},
 	"game":{"spawnBox":0.27, "frameDelay": 35},
 	"sequence": {
-		0: ["PROMPT", "Level 22"],
+		0: ["PROMPT", "Nobody likes you when you're 23."],
 		10: ["POWERUP", "clock"],
+		20: ["POWERUP", "trash"],
 		30: ["BOX", 0.32],
 		40: ["SPAWN", 10],
 		50: ["BOX", 0.27],
@@ -725,6 +780,52 @@ LEVELS[21] = {
 		740: ["BOX", 0.32],
 		750: ["SPAWN", 128+11],
 		760: ["BOX", 0.27],
-		830: ["END"]
+		830: ["SPAWN", 10],
+		900: ["SPAWN", 11],
+		1000: ["END"]
+	}
+}
+
+LEVELS[23] = {
+	"graphics":{"p1Color":0xFF2010, "p2Color":0x10FF20, "bgColor":0x100030},
+	"game":{"spawnBox":0.27, "frameDelay": 35},
+	"sequence": {
+		0: ["PROMPT", "24!"],
+		25: ["PROMPT", "Look out!"],
+		50: ["SPAWN", 15],
+		95: ["BOX", 0.28],
+		100: ["SPAWN", 15+128],
+		105: ["BOX", 0.27],
+		145: ["BOX", 0.29],
+		150: ["SPAWN", 15+128],
+		155: ["BOX", 0.27],
+		180: ["BOX", 0.32],
+		184: ["SPAWN", 128+16],
+		188: ["BOX", 0.27],
+		250: ["SPAWN", 15],
+		295: ["BOX", 0.28],
+		300: ["SPAWN", 15+128],
+		305: ["BOX", 0.27],
+		355: ["BOX", 0.29],
+		360: ["SPAWN", 15+128],
+		365: ["BOX", 0.27],
+		380: ["BOX", 0.32],
+		384: ["SPAWN", 128+16],
+		388: ["BOX", 0.27],
+		400: ["SPAWN", 15],
+		445: ["BOX", 0.28],
+		450: ["SPAWN", 15+128],
+		455: ["BOX", 0.27],
+		505: ["BOX", 0.29],
+		510: ["SPAWN", 15+128],
+		515: ["BOX", 0.27],
+		530: ["BOX", 0.40],
+		534: ["SPAWN", 128+16],
+		538: ["BOX", 0.27],
+		650: ["PROMPT", "It's not over."],
+		680: ["BOX", 0.29],
+		690: ["SPAWN", 15],
+		695: ["BOX", 0.27],
+		850: ["END"]
 	}
 }

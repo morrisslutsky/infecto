@@ -383,6 +383,12 @@ function cellAutomaton() {
         cb[cboard].cellState[x + szX * y] = ncell;
     }
 
+    this.getCell = function(x, y, cboard) {
+        if (!(that.validXY(x,y))) return 100; /* invalid */
+        var ocell = cb[cboard].cellState[x + szX * y];
+        return ocell;
+    }
+
     this.dropBlinker = function(posX, posY) {
         var bX = Math.round(posX * szX); 
         var bY = Math.round(posY * szY);
@@ -504,7 +510,11 @@ function cellAutomaton() {
             type = type & (~that.SPAWN_CLEAR_BOX);
             for (x = x0; x < x1; x++) {
                 for (y = y0; y < y1; y++) {
-                    that.alterCell(x, y, 0, 0);
+                    b = that.getCell(x, y, 0);
+                    if (b == 1) {b = -71;}
+                    else if (b == 2) {b = -72;}
+                    else {b = 0;}
+                    that.alterCell(x, y, b, 0);
                 }
             }
         }
@@ -577,6 +587,8 @@ function cellAutomaton() {
                     that.alterCell(x0, y, 1, 0);
                     that.alterCell(x1, y, 1, 0);
                 }
+                break;
+            case 16: /* null drop.  useful with SPAWN_CLEAR_BOX */
                 break;
         }
     }
