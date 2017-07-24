@@ -1075,3 +1075,69 @@ LEVELS[29] = {
 		1050: ["END"]
 	}
 }
+
+LEVELS[30] = {
+	"graphics":{"p1Color":0xFF0010, "p2Color":0x20FF00, "bgColor":0x000020},
+	"game":{"spawnBox":0.27, "frameDelay": 33, "dropMode": 1},
+	"sequence": {
+		0: ["PROMPT", "The cursor works differently now.  Try it!"],
+		50: ["PROMPT", "Instead of just dropping cells, you shoot 'gliders'."],
+		110: ["SPAWN", 0],
+		210: ["SPAWN", 1],
+		310: ["SPAWN", 2],
+		410: ["SPAWN", 3],
+		510: ["SPAWN", 4],
+		630: ["SPAWN", 0],
+		690: ["SPAWN", 129],
+		770: ["SPAWN", 130],
+		850: ["SPAWN", 131],
+		930: ["SPAWN", 132],
+		1030: ["SPAWN", 0],
+		1100: ["END"]
+	}
+}
+
+LEVELS[31] = {
+	"graphics":{"p1Color":0xC0C000, "p2Color":0xB0E0FF, "bgColor":0x000030},
+	"game":{"spawnBox":0.29, "frameDelay": 33, "dropMode": 1},
+	"sequence": {
+		0: ["PROMPT", "Thirty-Two!"],
+		10: ["SPAWN", 11],
+		90: ["SPAWN", 6],
+		140: ["SPAWN", 13],
+		220: ["SPAWN", 7],
+		260: ["SPAWN", 10],
+		340: ["SPAWN", 5],
+		390: ["SPAWN", 12],
+		470: ["SPAWN", 8],
+		510: ["SPAWN", 11],
+		590: ["SPAWN", 6],
+		640: ["SPAWN", 13],
+		720: ["SPAWN", 7],
+		760: ["SPAWN", 10],
+		840: ["SPAWN", 5],
+		890: ["SPAWN", 12],
+		970: ["SPAWN", 8],
+		1030: ["END"]
+	}
+}
+
+LEVELS[32] = {
+	"graphics":{"p1Color":0xFF0010, "p2Color":0x20FF00, "bgColor":0x000020},
+	"game":{"spawnBox":0.27, "frameDelay": 33, "dropMode": 2},
+	"sequence": {
+		0: ["PROMPT", "The cursor now shoots 'spaceships'.  Try it!"],
+		110: ["SPAWN", 0],
+		210: ["SPAWN", 1],
+		310: ["SPAWN", 2],
+		410: ["SPAWN", 3],
+		510: ["SPAWN", 4],
+		630: ["SPAWN", 0],
+		690: ["SPAWN", 129],
+		770: ["SPAWN", 130],
+		850: ["SPAWN", 131],
+		930: ["SPAWN", 132],
+		1030: ["SPAWN", 0],
+		1100: ["END"]
+	}
+}

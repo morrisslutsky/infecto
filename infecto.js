@@ -404,6 +404,34 @@ function cellAutomaton() {
 
     }
 
+    /* used to drop player glider or spaceship, as opposed to enemy formation */
+    this.putGlider = function(posX, posY) {
+        var bX = Math.round(posX * szX); 
+        var bY = Math.round(posY * szY);
+        bX = Math.max(2, bX); bY = Math.max(2, bY);
+        bX = Math.min(bX, szX - 3); bY = Math.min(bY, szY - 3);
+        /* 0 is down-right, 1 is down-left, 2 is up-right, 3 is up-left */
+        var dir = ( (posY > 0.5) ? 2 : 0 ) | ( (posX > 0.5 ) ? 1 : 0);
+        that.dropGlider(bX, bY, dir, 2);
+           
+    }
+
+    /* used to drop player glider or spaceship, as opposed to enemy formation */
+    this.putSpaceship = function(posX, posY) {
+        var bX = Math.round(posX * szX); 
+        var bY = Math.round(posY * szY);
+        bX = Math.max(3, bX); bY = Math.max(3, bY);
+        bX = Math.min(bX, szX - 4); bY = Math.min(bY, szY - 4);
+        /* spaceship dir 0=down 1=up 2=right 3=left */
+        var minD = Math.min(posX, posY, 1-posX, 1-posY);
+        if (minD == posX) {dir = 2;}
+        else if (minD == posY) {dir = 0;}
+        else if (minD == 1-posX) {dir = 3;}
+        else {dir = 1;}
+        that.dropSpaceship(bX, bY, dir, 2);
+           
+    }
+
     /*  reads cell states and neighbor counts from cb[0]
         writes them to cb[1].  Finally, swaps cb[0] and cb[1] */
 
@@ -536,10 +564,10 @@ function cellAutomaton() {
             case 4:
                 for (x = szX/2; x < x1-2; x += 5) {
                     for (y = szY/2; y < y1-2; y+= 5) {
-                        that.dropGlider(x,y,type-1);
-                        that.dropGlider(szX-x, szY-y, type-1);
-                        that.dropGlider(szX-x, y, type-1);
-                        that.dropGlider(x, szY-y, type-1);
+                        that.dropGlider(x,y,type-1,1);
+                        that.dropGlider(szX-x, szY-y, type-1,1);
+                        that.dropGlider(szX-x, y, type-1,1);
+                        that.dropGlider(x, szY-y, type-1,1);
                     }
                 }
                 break; 
@@ -555,10 +583,10 @@ function cellAutomaton() {
                 if (type == 9) {a1 = a2 = a3 = a4 = true;}
                 for (x = 5 + szX/2; x < x1-2; x += 5) {
                     for (y = 5 + szY/2; y < y1-2; y+= 5) {
-                        if (a1) {that.dropGlider(x,y,0);}
-                        if (a2) {that.dropGlider(szX-x, szY-y, 3);}
-                        if (a3) {that.dropGlider(szX-x, y, 1);}
-                        if (a4) {that.dropGlider(x, szY-y, 2);}
+                        if (a1) {that.dropGlider(x,y,0,1);}
+                        if (a2) {that.dropGlider(szX-x, szY-y, 3,1);}
+                        if (a3) {that.dropGlider(szX-x, y, 1,1);}
+                        if (a4) {that.dropGlider(x, szY-y, 2,1);}
                     }
                 }
                 break;
@@ -569,10 +597,10 @@ function cellAutomaton() {
             case 13: /* left */
                 for (x = szX/2; x < x1-3; x += 7) {
                     for (y = szY/2; y < y1-3; y+= 7) {
-                        that.dropSpaceship(x,y,type-10);
-                        that.dropSpaceship(szX-x, szY-y, type-10);
-                        that.dropSpaceship(szX-x, y, type-10);
-                        that.dropSpaceship(x, szY-y, type-10);
+                        that.dropSpaceship(x,y,type-10, 1);
+                        that.dropSpaceship(szX-x, szY-y, type-10, 1);
+                        that.dropSpaceship(szX-x, y, type-10, 1);
+                        that.dropSpaceship(x, szY-y, type-10, 1);
                     }
                 }
                 break;
@@ -613,7 +641,7 @@ function cellAutomaton() {
     }
 
     /* x and y are center position.  dir is 0 to 3, specs orientation */
-    this.dropSpaceship = function (x, y, dir) {
+    this.dropSpaceship = function (x, y, dir, pl) {
         var i, j;
         var spc = [ [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,1,1,1,1,0], 
                     [0,1,0,0,0,1,0], [0,0,0,0,0,1,0], [0,1,0,0,1,0,0],
@@ -626,15 +654,16 @@ function cellAutomaton() {
 
         for (i = 0; i < 7; i++) {
             for (j = 0; j < 7; j++) {
-                if (dir & 2) {that.alterCell (x + i - 3, y + j - 3, spc[j][i], 0);}
-                else {that.alterCell (x + i - 3, y + j - 3, spc[i][j], 0);}
+                if (dir & 2) {that.alterCell (x + i - 3, y + j - 3, pl*spc[j][i], 0);}
+                else {that.alterCell (x + i - 3, y + j - 3, pl*spc[i][j], 0);}
             }
         }
     }
 
 
+
     /* x and y are center position.  dir is 0 to 3, specs orientation */
-    this.dropGlider = function (x, y, dir) {
+    this.dropGlider = function (x, y, dir, pl) {
         var i, j;
         var gld = [ [0,0,0,0,0], [0,0,1,0,0], [0,0,0,1,0], [0,1,1,1,0], [0,0,0,0,0]];
         if (dir & 1) {gld.reverse();}
@@ -646,7 +675,7 @@ function cellAutomaton() {
 
         for (i = 0; i < 5; i++) {
             for (j = 0; j < 5; j++) {
-                that.alterCell (x + i - 2, y + j - 2, gld[i][j], 0)
+                that.alterCell (x + i - 2, y + j - 2, pl*gld[i][j], 0)
             }
         }
     }
@@ -878,8 +907,19 @@ function CLifer () {
         /* manage input and drop cells */
         gC.physics();
         if (that.dropCycle == 0) {
-            if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) )
-                    {cA.dropBlinker(gC.posX, gC.posY);}
+            if ( (Math.abs(gC.posX - 0.5) > g.spawnBox) || (Math.abs(gC.posY - 0.5) > g.spawnBox) ){
+                switch (g.dropMode) {
+                    case 0:
+                        cA.dropBlinker(gC.posX, gC.posY);
+                        break;
+                    case 1:
+                        cA.putGlider(gC.posX, gC.posY); /* dropGlider name used by spawn routine sorry */
+                        break;
+                    case 2:
+                        cA.putSpaceship(gC.posX, gC.posY);
+                        break;
+                }
+            }
         }
         that.dropCycle++; if (that.dropCycle == g.dropCycles) {that.dropCycle = 0;}
         /* run automaton and check loss conditions */
