@@ -38,6 +38,7 @@ function gameSettings() {
     this.defaults = function() {
         that.spawnBox = 0.25;
         that.dropCycles = 1;
+        that.dropMode = 0; /* 0 is blinker.  */
         that.frameDelay = 40;
         that.shieldWidth = 5;
     }
@@ -589,6 +590,24 @@ function cellAutomaton() {
                 }
                 break;
             case 16: /* null drop.  useful with SPAWN_CLEAR_BOX */
+                break;
+            case 17: /* drop blocks tight pattern*/
+                for (x=x0; x<= x1; x++) {
+                    for (y = y0; y<=y1; y++) {
+                        if ( (x & 2) & (y & 2) ) {
+                            that.alterCell(x,y,1,0);
+                        }
+                    }
+                }
+                break;
+            case 18: /* drop blocks loose pattern*/
+                for (x=x0; x<= x1; x++) {
+                    for (y = y0; y<=y1; y++) {
+                        if ( ((x %6) < 2 ) & ((y %6)<2) ) {
+                            that.alterCell(x,y,1,0);
+                        }
+                    }
+                }
                 break;
         }
     }
